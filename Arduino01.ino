@@ -1,99 +1,89 @@
 // Arduino01
 // 02/03/2014
 
-// Code modified from: Adafruit.com; Peter H Anderson
+// Read digital & analog data from single remote node
+// Utilizes Arduino Mega's multiple serial I/O pins
 
-#include <SoftwareSerial.h>
+// Code modified from: Adafruit.com; Peter H Anderson; xbee-arduino library examples
 
-#define rxPin 10
-#define txPin 11
+#include <XBee.h>
 
-SoftwareSerial xbeeSerial = SoftwareSerial(rxPin, txPin);
-
-// Pinout
-int pTMP = A0; 
-int pLDR1 = A1;
-int pLDR2 = A2;
-int pPIR = A5;
-int pHUM = A6;
+XBee xbee = XBee();
+ZBRxIoSampleResponse ioSample = ZBRxIoSampleResponse();
+XBee Address64 test = XBeeAddress64();
 
 
-float vPIR = 2000;
-float vTMP = 0;
-float vLDR = 0;
-float vHUM = 0;
-int n = 0;
 
 void setup()
 {
-  Serial.begin(9600); 
-  xbeeSerial.begin(9600);
+  Serial.begin(9600); //For communication to/from computer
+  
+  Serial.begin(9600); //For communication to/from XBee
+  xbee.setSerial(Serial1);
 }
  
- 
+
 void loop() {
-  if (xbeeSerial.available() >= 21){
-    byte xbee[23];
-    if (xbeeSerial.read() == 0x7E){  // starting byte 
-      for (int i = 1; i < 25; i++){
-        xbee[i-1] = xbeeSerial.read();
-        delay(5); 
+  //attempt to read a packet    
+  xbee.readPacket();
+
+  if (xbee.getResponse().isAvailable()) {
+    // got something
+
+    if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
+      xbee.getResponse().getZBRxIoSampleResponse(ioSample);
+
+      nss.print("Received I/O Sample from: ");
+      
+      nss.print(ioSample.getRemoteAddress64().getMsb(), HEX);  
+      nss.print(ioSample.getRemoteAddress64().getLsb(), HEX);  
+      nss.println("");
+      
+      if (ioSample.containsAnalog()) {
+        nss.println("Sample contains analog data");
       }
 
-      String slave_one = "171185222";
-      String address;  // Each router's unique address
-      for (int q = 8; q < 11; q = q + 1) {
-           address = String(address + String(xbee[q]));
-       }
-      
-      float motion = getMotion(xbee[18], xbee[19]);
-      
-      if(motion < vPIR) {
-        vPIR = motion;
+      if (ioSample.containsDigital()) {
+        nss.println("Sample contains digtal data");
+      }      
+
+      // read analog inputs
+      for (int i = 0; i <= 4; i++) {
+        if (ioSample.isAnalogEnabled(i)) {
+          nss.print("Analog (AI");
+          nss.print(i, DEC);
+          nss.print(") is ");
+          nss.println(ioSample.getAnalog(i), DEC);
+        }
       }
-    }
+
+      // check digital inputs
+      for (int i = 0; i <= 12; i++) {
+        if (ioSample.isDigitalEnabled(i)) {
+          nss.print("Digital (DI");
+          nss.print(i, DEC);
+          nss.print(") is ");
+          nss.println(ioSample.isDigitalOn(i), DEC);
+        }
+      }
+      
+      // method for printing the entire frame data
+      //for (int i = 0; i < xbee.getResponse().getFrameDataLength(); i++) {
+      //  nss.print("byte [");
+      //  nss.print(i, DEC);
+      //  nss.print("] is ");
+      //  nss.println(xbee.getResponse().getFrameData()[i], HEX);
+      //}
+    } 
+    else {
+      nss.print("Expected I/O Sample, but got ");
+      nss.print(xbee.getResponse().getApiId(), HEX);
+    }    
+  } else if (xbee.getResponse().isError()) {
+    nss.print("Error reading packet.  Error code: ");  
+    nss.println(xbee.getResponse().getErrorCode());
   }
-  
-  n += 1;
-  float t = fTMP();
- // Serial.println(t);
-  vTMP += t;
-  vLDR += fLDR();
-//  int iCO = fCO(iCO_last);
-  int iCO = fCO();
-  iCO_last = iCO;
-  vHUM += hum();
-  vTH += temp()*9.0/5.0 + 32.0;
-  
-  
-  if(Serial.available() > 0) {
-    Serial.read();
-    
-  //  Serial.print(n);
-   // Serial.print(',');
-    Serial.print(vTMP/n);
-    Serial.print(',');
-    Serial.print(vLDR/n);
-    Serial.print(',');
-    Serial.print(iCO);
-    Serial.print(',');
-    Serial.print(vPIR);
-    Serial.print(',');
-    Serial.print(vHUM/n);
-    Serial.print(',');
-    Serial.println(vTH/n);
-    
-    vPIR = 2000;
-    vTMP = 0;
-    vLDR = 0;
-    vCO = 0;
-    vHUM = 0;
-    vTH = 0;
-    n = 0;
-  } 
-  
-  delay(500);
-  
+}
 }
 
 
