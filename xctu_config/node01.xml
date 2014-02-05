@@ -11,7 +11,7 @@
       <setting command="NJ">FF</setting>
       <setting command="JN">0</setting>
       <setting command="DH">0</setting>
-      <setting command="DL">0</setting>
+      <setting command="DL">FFFF</setting>
       <setting command="NI">NET01_N01</setting>
       <setting command="NH">1E</setting>
       <setting command="BH">0</setting>
@@ -50,7 +50,7 @@
       <setting command="LT">0</setting>
       <setting command="RP">28</setting>
       <setting command="DO">1</setting>
-      <setting command="IR">32</setting>
+      <setting command="IR">3E8</setting>
       <setting command="IC">0</setting>
       <setting command="V+">0</setting>
     </settings>
