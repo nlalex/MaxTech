@@ -6,20 +6,25 @@
 
 // Code modified from: Adafruit.com; Peter H Anderson; xbee-arduino library examples
 
-#include <XBee.h>
+#include <SoftwareSerial.h>
+#define rxPin 10
+#define txPin 11
+SoftwareSerial xbeeSerial = SoftwareSerial(rxPin, txPin);
 
+#include <XBee.h>
 XBee xbee = XBee();
 ZBRxIoSampleResponse ioSample = ZBRxIoSampleResponse();
-XBee Address64 test = XBeeAddress64();
+XBeeAddress64 test = XBeeAddress64();
 
 
 
 void setup()
 {
   Serial.begin(9600); //For communication to/from computer
-  
-  Serial.begin(9600); //For communication to/from XBee
-  xbee.setSerial(Serial1);
+ 
+  //Serial1.begin(9600); //For communication to/from XBee
+  xbeeSerial.begin(9600);
+  xbee.setSerial(xbeeSerial);
 }
  
 
@@ -33,61 +38,60 @@ void loop() {
     if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
       xbee.getResponse().getZBRxIoSampleResponse(ioSample);
 
-      nss.print("Received I/O Sample from: ");
+      Serial.print("Received I/O Sample from: ");
       
-      nss.print(ioSample.getRemoteAddress64().getMsb(), HEX);  
-      nss.print(ioSample.getRemoteAddress64().getLsb(), HEX);  
-      nss.println("");
+      Serial.print(ioSample.getRemoteAddress64().getMsb(), HEX);  
+      Serial.print(ioSample.getRemoteAddress64().getLsb(), HEX);  
+      Serial.println("");
       
       if (ioSample.containsAnalog()) {
-        nss.println("Sample contains analog data");
+        Serial.println("Sample contains analog data");
       }
 
       if (ioSample.containsDigital()) {
-        nss.println("Sample contains digtal data");
+        Serial.println("Sample contains digtal data");
       }      
 
       // read analog inputs
       for (int i = 0; i <= 4; i++) {
         if (ioSample.isAnalogEnabled(i)) {
-          nss.print("Analog (AI");
-          nss.print(i, DEC);
-          nss.print(") is ");
-          nss.println(ioSample.getAnalog(i), DEC);
+          Serial.print("Analog (AI");
+          Serial.print(i, DEC);
+          Serial.print(") is ");
+          Serial.println(ioSample.getAnalog(i), DEC);
         }
       }
 
       // check digital inputs
       for (int i = 0; i <= 12; i++) {
         if (ioSample.isDigitalEnabled(i)) {
-          nss.print("Digital (DI");
-          nss.print(i, DEC);
-          nss.print(") is ");
-          nss.println(ioSample.isDigitalOn(i), DEC);
+          Serial.print("Digital (DI");
+          Serial.print(i, DEC);
+          Serial.print(") is ");
+          Serial.println(ioSample.isDigitalOn(i), DEC);
         }
       }
       
       // method for printing the entire frame data
       //for (int i = 0; i < xbee.getResponse().getFrameDataLength(); i++) {
-      //  nss.print("byte [");
-      //  nss.print(i, DEC);
-      //  nss.print("] is ");
-      //  nss.println(xbee.getResponse().getFrameData()[i], HEX);
+      //  Serial.print("byte [");
+      //  Serial.print(i, DEC);
+      //  Serial.print("] is ");
+      //  Serial.println(xbee.getResponse().getFrameData()[i], HEX);
       //}
     } 
     else {
-      nss.print("Expected I/O Sample, but got ");
-      nss.print(xbee.getResponse().getApiId(), HEX);
+      Serial.print("Expected I/O Sample, but got ");
+      Serial.print(xbee.getResponse().getApiId(), HEX);
     }    
   } else if (xbee.getResponse().isError()) {
-    nss.print("Error reading packet.  Error code: ");  
-    nss.println(xbee.getResponse().getErrorCode());
+    Serial.print("Error reading packet.  Error code: ");  
+    Serial.println(xbee.getResponse().getErrorCode());
   }
 }
-}
 
 
-
+/*
 float fTMP() {
   // Returns temperature from TMP36 in degF
   // From left to right looking at flat side of sensor -> +5V, Analog Out, Gnd
@@ -108,4 +112,4 @@ int fLDR() {
 float getMotion(int MSB1, int LSB1){
   int motion_analog = MSB1 * 256 + LSB1;
   return motion_analog;
-}
+}*/
