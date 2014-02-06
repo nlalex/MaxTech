@@ -1,15 +1,23 @@
-#include "node.h"
+#include "Node.h"
 
-node::node(str address) {
+Node::Node(str address) {
   _address = address;
 }
 
-node::~node() {}
+Node::~Node() {}
 
-node::stash() {
+void Node::stash() {
   
 }
 
-node::flush() {
+void Node::flush() {
 
+}
+
+float Node::convertTemp(int temp) {
+  return float(temp);
+}
+
+float Node::convertHum(int hum) {
+  return float(hum);
 }
