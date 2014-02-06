@@ -3,6 +3,7 @@
 
 #include <WProgram.h>
 #include <XBee.h>
+#include "Config.h"
 
 class Node {
   public:
@@ -10,6 +11,8 @@ class Node {
     ~Node();
     void stash();
     void flush();
+    float convertTemp(int temp);
+    float convertHum(int hum);
   private:
     str _address;
     float temp[];
