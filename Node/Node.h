@@ -1,13 +1,14 @@
-#ifndef node_h
-#define node_h
+#ifndef Node_h
+#define Node_h
 
 #include <WProgram.h>
+#include <XBee.h>
 
-class node {
+class Node {
   public:
-    node(str address);
-    ~node();
-    void note();
+    Node(str address);
+    ~Node();
+    void stash();
     void flush();
   private:
     str _address;
