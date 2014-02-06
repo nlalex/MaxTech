@@ -1,13 +1,13 @@
-#ifndef NODE_H
-#define NODE_H
+#ifndef node_h
+#define node_h
 
 #include <WProgram.h>
 
-class NODE {
+class node {
   public:
-    NODE(str address);
-    ~NODE();
-    void log();
+    node(str address);
+    ~node();
+    void note();
     void flush();
   private:
     str _address;
