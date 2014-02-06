@@ -14,9 +14,8 @@ ZBRxIoSampleResponse ioSample = ZBRxIoSampleResponse();
 XBeeAddress64 test = XBeeAddress64();
 
 //Setup node validation
-#define node1 100
-#define node2 100
-#define node3 100
+#define node1_addr 100
+#define node2_addr 100
 
 void setup()
 {
