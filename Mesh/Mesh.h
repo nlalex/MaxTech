@@ -14,11 +14,11 @@ class Mesh {
     float convertTemp(int temp);
     float convertHum(int hum);
   private:
-    char _address[];
-    float temp[];
-    float hum[];
-    int light1[];
-    int light2[];
+    char _address[][];
+    float temp[][];
+    float hum[][];
+    int light1[][];
+    int light2[][];
 };
 
 #endif
