@@ -11,11 +11,7 @@ SoftwareSerial xbeeSerial = SoftwareSerial(rxPin, txPin);
 #include <XBee.h>
 XBee xbee = XBee();
 ZBRxIoSampleResponse ioSample = ZBRxIoSampleResponse();
-XBeeAddress64 test = XBeeAddress64();
-
-//Setup node validation
-#define node1_addr 100
-#define node2_addr 100
+XBeeAddress64 test_only6C = XBeeAddress64();
 
 void setup()
 {
@@ -24,10 +20,13 @@ void setup()
   //Serial1.begin(9600); //For communication to/from XBee
   xbeeSerial.begin(9600);
   xbee.setSerial(xbeeSerial);
+  test_only6C.setMsb(1286656);
+  test_only6C.setLsb(1084996460);
 }
  
 
 void loop() {
+  
   //attempt to read a packet    
   xbee.readPacket();
 
@@ -41,6 +40,12 @@ void loop() {
       
       Serial.print(ioSample.getRemoteAddress64().getMsb(), HEX);  
       Serial.print(ioSample.getRemoteAddress64().getLsb(), HEX);  
+      Serial.println("");
+      
+      
+      Serial.print("Plain Address: ");
+      Serial.println(ioSample.getRemoteAddress64().getMsb()); //Prints first half of address in HEX (eg 13A200)
+      Serial.print(ioSample.getRemoteAddress64().getLsb());
       Serial.println("");
       
       if (ioSample.containsAnalog()) {
@@ -87,6 +92,7 @@ void loop() {
     Serial.print("Error reading packet.  Error code: ");  
     Serial.println(xbee.getResponse().getErrorCode());
   }
+  
 }
 
 
