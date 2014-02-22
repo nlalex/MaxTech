@@ -7,7 +7,7 @@
 
 class Node {
   public:
-    Node(str msb, str lsb);
+    Node(str msb_in, str lsb_in, str loc_in);
     ~Node();
     void stash();
     void flush();
