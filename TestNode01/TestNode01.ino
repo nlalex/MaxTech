@@ -13,6 +13,15 @@ XBee xbee = XBee();
 ZBRxIoSampleResponse ioSample = ZBRxIoSampleResponse();
 XBeeAddress64 test_only6C = XBeeAddress64(0x13A200, 0x40ABBB6C);
 
+#define ADDR1_MSB "000AAA"
+#define ADDR1_LSB "000AAA"
+#define LOC1 "Living Room"
+#define ADDR2_MSB "000AAA"
+#define ADDR2_LSB "000AAA"
+#define LOC2 "Bathroom"
+Node node1 = Node(ADDR1_MSB, ADDR1_LSB, LOC1);
+Node node2 = Node(ADDR2_MSB, ADDR2_LSB, LOC2);
+
 void setup()
 {
   Serial.begin(9600); //For communication to/from computer
