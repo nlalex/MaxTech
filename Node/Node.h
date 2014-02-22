@@ -13,13 +13,13 @@ class Node {
     void flush();
     float convertTemp(int temp);
     float convertHum(int hum);
-    bool checkPIR(int PIR);
+    boolean checkPIR(int PIR);
     XBeeAdress64 addr;
     float temp;
     float hum;
     int ldr1;
     int ldr2;
-    bool PIR;
+    boolean PIR;
   private:
 };
 
