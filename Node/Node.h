@@ -14,8 +14,7 @@ class Node {
     float convertTemp(int temp);
     float convertHum(int hum);
     bool checkPIR(int PIR);
-    str msb;
-    str lsb;
+    XBeeAdress64 addr;
     float temp;
     float hum;
     int ldr1;
