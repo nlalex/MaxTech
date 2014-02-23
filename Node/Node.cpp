@@ -3,43 +3,43 @@
 //#include <XBee.h>
 //#include "Config.h"
 
-Node::Node(str msb_in, str lsb_in, str loc_in) {
+Node::Node(unit32_t msb_in, unit32_t lsb_in, String loc_in) {
   addr = XBeeAdress64(msb_in, lsb_in);
   loc = loc_in;
-  temp = 0;
-  hum = 0;
-  ldr1 = 0;
-  ldr2 = 0;
+  _temp = 0;
+  _hum = 0;
+  _ldr1 = 0;
+  _ldr2 = 0;
   _pir = 0;
-  motion = 0;
+  _motion = 0;
 }
 
 Node::~Node() {}
 
 void Node::stash(ZBRxIoSampleResponse packet) {
-  temp = packet.getAnalog(pTEMP);
-  hum = packet.getAnalog(pHUM);
-  ldr1 = packet.getAnalog(pLDR1);
-  ldr2 = packet.getAnalog(pLDR2);
+  _temp = packet.getAnalog(pTEMP);
+  _hum = packet.getAnalog(pHUM);
+  _ldr1 = packet.getAnalog(pLDR1);
+  _ldr2 = packet.getAnalog(pLDR2);
   _pir = packet.getDigital(pPIR);
 }
 
 void Node::flush() {
-  temp = 0;
-  hum = 0;
-  ldr1 = 0;
-  ldr2 = 0;
+  _temp = 0;
+  _hum = 0;
+  _ldr1 = 0;
+  _ldr2 = 0;
   _pir = 0;
-  motion = 0;
+  _motion = 0;
 }
 
 void Node::convertTemp() {
-  int temp_analog = temp;
+  int temp_analog = _temp;
   float voltage = temp_analog * 5.0;
   voltage /= 1024.0;  
   float temperatureC = (voltage - 0.5) * 100 ;
   float temperatureF = ((temperatureC * 9.0) / 5.0) + 32.0;
-  temp = temperatureF;
+  _temp = temperatureF;
 }
 
 void Node::convertHum() {
@@ -47,10 +47,10 @@ void Node::convertHum() {
 }
 
 void Node::convertMotion() {
-  if(byte _pir == 0 && motion == 0) {
+  if(byte _pir == 0 && _motion == 0) {
     return;
   } else {
-    motion = 1;
+    _motion = 1;
   }
 }
 
@@ -68,19 +68,21 @@ void Node::printAll() {
   Serial.println(addr.getLsb());
   
   Serial.print("Temperature: ");
-  Serial.print(temp);
+  Serial.print(_temp);
   
   Serial.print("Humidity: ");
-  Serial.println(hum);
+  Serial.println(_hum);
   
   Serial.print("Light #1: ");
-  Serial.println(ldr1);
+  Serial.println(_ldr1);
   
   Serial.print("Light #2: ");
-  Serial.println(ldr2);
+  Serial.println(_ldr2);
   
   Serial.print("Motion: ");
-  Serial.println(motion);
+  Serial.println(_motion);
   
   Serial.println("");
 }
+
+
