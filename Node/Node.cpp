@@ -5,7 +5,7 @@
 
 Node::Node(str msb_in, str lsb_in, str loc_in) {
   addr = XBeeAdress64(msb_in, lsb_in);
-  loc = loc_in;j
+  loc = loc_in;
   temp = 0;
   hum = 0;
   ldr1 = 0;
