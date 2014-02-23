@@ -10,15 +10,8 @@ SoftwareSerial xbeeSerial = SoftwareSerial(rxPin, txPin);
 
 #include <XBee.h>
 XBee xbee = XBee();
-ZBRxIoSampleResponse ioSample = ZBRxIoSampleResponse();
-XBeeAddress64 test_only6C = XBeeAddress64(0x13A200, 0x40ABBB6C);
+ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
 
-#define ADDR1_MSB "000AAA"
-#define ADDR1_LSB "000AAA"
-#define LOC1 "Living Room"
-#define ADDR2_MSB "000AAA"
-#define ADDR2_LSB "000AAA"
-#define LOC2 "Bathroom"
 Node node1 = Node(ADDR1_MSB, ADDR1_LSB, LOC1);
 Node node2 = Node(ADDR2_MSB, ADDR2_LSB, LOC2);
 
@@ -29,8 +22,6 @@ void setup()
   //Serial1.begin(9600); //For communication to/from XBee
   xbeeSerial.begin(9600);
   xbee.setSerial(xbeeSerial);
-  //test_only6C.setMsb(1286656);
-  //test_only6C.setLsb(1084996460);
 }
  
 
@@ -43,14 +34,26 @@ void loop() {
     // got something
 
     if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
-      xbee.getResponse().getZBRxIoSampleResponse(ioSample);
+      xbee.getResponse().getZBRxIoSampleResponse(response);
+      
+      if(node1.match(response)) {
+        node1.stash(response);
+      } else if(node2.match(response)) {
+        node2.stash(response);
+      }
+    }
+  }
+  
+  node1.printAll();
+  node2.printAll();
+  
+  node1.flush();
+  node2.flush();
+}
 
+/*
       Serial.print("Received I/O Sample from: ");
-      
-      Serial.print(ioSample.getRemoteAddress64().getMsb(), HEX);  
-      Serial.print(ioSample.getRemoteAddress64().getLsb(), HEX);  
-      Serial.println("");
-      
+
       if(ioSample.getRemoteAddress64().getLsb()==test_only6C.getLsb()){
         Serial.println("Matched address!!!");
         Serial.println("");
@@ -131,3 +134,4 @@ float getMotion(int MSB1, int LSB1){
   int motion_analog = MSB1 * 256 + LSB1;
   return motion_analog;
 }*/
+*/
