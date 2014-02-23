@@ -10,7 +10,8 @@ Node::Node(str msb_in, str lsb_in, str loc_in) {
   hum = 0;
   ldr1 = 0;
   ldr2 = 0;
-  motion = false;
+  _pir = 0;
+  motion = 0;
 }
 
 Node::~Node() {}
@@ -50,4 +51,35 @@ byte Node::convertMotion(byte pir, byte motion) {
   } else {
     return 1;
   }
+}
+
+boolean Node::matchAddr(ZBRxIoSampleResponse packet) {
+  if(packet.getRemoteAddress64().getLsb()==addr.getLsb() && packet.getRemoteAddress64().getMsb()==addr.getMsb()) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void Node::printAll() {
+  Serial.print("Node Address: ");
+  Serial.print(addr.getMsb());
+  Serial.println(addr.getLsb());
+  
+  Serial.print("Temperature: ");
+  Serial.print(temp);
+  
+  Serial.print("Humidity: ");
+  Serial.println(hum);
+  
+  Serial.print("Light #1: ");
+  Serial.println(ldr1);
+  
+  Serial.print("Light #2: ");
+  Serial.println(ldr2);
+  
+  Serial.print("Motion: ");
+  Serial.println(motion);
+  
+  Serial.println("");
 }
