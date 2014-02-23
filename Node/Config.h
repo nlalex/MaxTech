@@ -1,5 +1,5 @@
-const byte tempPin = 1;
-const byte humPin = 2;
-const byte ldr1Pin = 3;
-const byte ldr2Pin = 4;
-const byte pirPin = 5;
+const byte pTEMP = 1;
+const byte pHUM = 2;
+const byte pLDR1 = 3;
+const byte pLDR2 = 4;
+const byte pPIR = 5;
