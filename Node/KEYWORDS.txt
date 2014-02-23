@@ -1,0 +1,6 @@
+Node KEYWORD1
+stash KEYWORD2
+flush KEYWORD2
+convertTemp KEYWORD2
+convertHum KEYWORD2
+convertMotion KEYWORD2
