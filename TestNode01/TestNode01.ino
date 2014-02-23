@@ -38,8 +38,14 @@ void loop() {
       
       if(node1.match(response)) {
         node1.stash(response);
+        node1.convertTemp();
+        node1.convertHum();
+        node1.convertMotion();
       } else if(node2.match(response)) {
         node2.stash(response);
+        node2.convertTemp();
+        node2.convertHum();
+        node2.convertMotion();
       }
     }
   }
