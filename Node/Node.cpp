@@ -33,23 +33,24 @@ void Node::flush() {
   motion = 0;
 }
 
-float Node::convertTemp(int temp) {
-  float voltage = temp * 5.0;
+void Node::convertTemp() {
+  int temp_analog = temp;
+  float voltage = temp_analog * 5.0;
   voltage /= 1024.0;  
   float temperatureC = (voltage - 0.5) * 100 ;
   float temperatureF = ((temperatureC * 9.0) / 5.0) + 32.0;
-  return temperatureF;
+  temp = temperatureF;
 }
 
-float Node::convertHum(int hum) {
-  return float(hum);
+void Node::convertHum() {
+
 }
 
-byte Node::convertMotion(byte pir, byte motion) {
-  if(byte pir == 0 && motion == 0) {
-    return 0;
+void Node::convertMotion() {
+  if(byte _pir == 0 && motion == 0) {
+    return;
   } else {
-    return 1;
+    motion = 1;
   }
 }
 
