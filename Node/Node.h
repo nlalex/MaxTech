@@ -9,7 +9,7 @@ class Node {
   public:
     Node(str msb_in, str lsb_in, str loc_in);
     ~Node();
-    void stash();
+    void stash(ZBRxIoSampleResponse packet);
     void flush();
     float convertTemp(int temp);
     float convertHum(int hum);
@@ -19,8 +19,9 @@ class Node {
     float hum;
     int ldr1;
     int ldr2;
-    boolean PIR;
+    byte motion;
   private:
+    int _pir; //temporary motion holder for raw data
 };
 
 #endif
