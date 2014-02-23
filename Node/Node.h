@@ -14,6 +14,8 @@ class Node {
     float convertTemp(int temp); //converts analog value to temperature in degF
     float convertHum(int hum);
     byte convertMotion(byte pir, byte motion); //allows any motion within reporting window to be recongnized
+    boolean matchAddr(ZBRxIoSampleResponse packet); //checks for address match
+    void printAll(); //prints all variables to console via Serial for testing purposes
     XBeeAdress64 addr; //node address placeholder
     float temp;
     float hum;
