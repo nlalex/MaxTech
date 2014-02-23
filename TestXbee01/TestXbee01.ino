@@ -6,25 +6,27 @@
 
 // Code modified from: Adafruit.com; Peter H Anderson; xbee-arduino library examples
 
-#include <SoftwareSerial.h>
-#define rxPin 10
-#define txPin 11
-SoftwareSerial xbeeSerial = SoftwareSerial(rxPin, txPin);
+//#include <SoftwareSerial.h>
+//#define rxPin 10
+//#define txPin 11
+//SoftwareSerial xbeeSerial = SoftwareSerial(rxPin, txPin);
+
 
 #include <XBee.h>
 XBee xbee = XBee();
 ZBRxIoSampleResponse ioSample = ZBRxIoSampleResponse();
 XBeeAddress64 test = XBeeAddress64();
+XBeeAddress64 test1 = XBeeAddress64(0x43A, 0x543);
 
 
 
 void setup()
 {
   Serial.begin(9600); //For communication to/from computer
- 
+ Serial1.begin(9600);
   //Serial1.begin(9600); //For communication to/from XBee
-  xbeeSerial.begin(9600);
-  xbee.setSerial(xbeeSerial);
+  //xbeeSerial.begin(9600);
+  xbee.setSerial(Serial1);
 }
  
 

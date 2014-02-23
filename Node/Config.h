@@ -1,5 +1,5 @@
-const byte pTEMP = 1;
-const byte pHUM = 2;
-const byte pLDR1 = 3;
-const byte pLDR2 = 4;
-const byte pPIR = 5;
+const int pTEMP = 2;
+const int pHUM = 1;
+const int pLDR1 = 0;
+const int pLDR2 = 3;
+const int pPIR = 4;

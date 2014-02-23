@@ -3,8 +3,8 @@
 //#include <XBee.h>
 //#include "Config.h"
 
-Node::Node(unit32_t msb_in, unit32_t lsb_in, String loc_in) {
-  addr = XBeeAdress64(msb_in, lsb_in);
+Node::Node(XBeeAddress64 addr_in, String loc_in) {
+  addr = addr_in;
   loc = loc_in;
   _temp = 0;
   _hum = 0;
@@ -21,7 +21,7 @@ void Node::stash(ZBRxIoSampleResponse packet) {
   _hum = packet.getAnalog(pHUM);
   _ldr1 = packet.getAnalog(pLDR1);
   _ldr2 = packet.getAnalog(pLDR2);
-  _pir = packet.getDigital(pPIR);
+  _pir = packet.isDigitalOn(pPIR);
 }
 
 void Node::flush() {
@@ -47,7 +47,7 @@ void Node::convertHum() {
 }
 
 void Node::convertMotion() {
-  if(byte _pir == 0 && _motion == 0) {
+  if(_pir == 0 && _motion == 0) {
     return;
   } else {
     _motion = 1;
