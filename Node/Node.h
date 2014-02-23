@@ -7,21 +7,21 @@
 
 class Node {
   public:
-    Node(str msb_in, str lsb_in, str loc_in);
-    ~Node();
-    void stash(ZBRxIoSampleResponse packet);
-    void flush();
-    float convertTemp(int temp);
+    Node(str msb_in, str lsb_in, str loc_in); //class constructor -> initializes variables
+    ~Node(); //class destructor -> does nothing
+    void stash(ZBRxIoSampleResponse packet); //stores packet data to class variables
+    void flush(); //resets all class variables to 0
+    float convertTemp(int temp); //converts analog value to temperature in degF
     float convertHum(int hum);
-    boolean checkPIR(int PIR);
-    XBeeAdress64 addr;
+    byte convertMotion(byte pir, byte motion); //allows any motion within reporting window to be recongnized
+    XBeeAdress64 addr; //node address placeholder
     float temp;
     float hum;
     int ldr1;
     int ldr2;
     byte motion;
   private:
-    int _pir; //temporary motion holder for raw data
+    byte _pir; //temporary motion holder for raw data
 };
 
 #endif
