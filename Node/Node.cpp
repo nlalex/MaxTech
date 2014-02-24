@@ -3,9 +3,9 @@
 //#include <XBee.h>
 //#include "Config.h"
 
-Node::Node(XBeeAddress64 addr_in, String loc_in) {
+Node::Node(XBeeAddress64 addr_in, int num_in) {
   addr = addr_in;
-  loc = loc_in;
+  num = num_in;
   _temp = 0;
   _hum = 0;
   _ldr1 = 0;
@@ -66,6 +66,9 @@ boolean Node::matchAddr(ZBRxIoSampleResponse packet) {
 }
 
 void Node::printAll() {
+  Serial.print("Node #: ");
+  Serial.println(_num);
+
   Serial.print("Node Address: ");
   Serial.print(addr.getMsb());
   Serial.println(addr.getLsb());

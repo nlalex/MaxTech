@@ -7,7 +7,7 @@
 
 class Node {
   public:
-    Node(XBeeAddress64 addr_in, String loc_in); //class constructor -> initializes variables
+    Node(XBeeAddress64 addr_in, int num_in); //class constructor -> initializes variables
     ~Node(); //class destructor -> does nothing
     void stash(ZBRxIoSampleResponse packet); //stores packet data to class variables
     void flush(); //resets all class variables to 0
@@ -17,7 +17,7 @@ class Node {
     boolean matchAddr(ZBRxIoSampleResponse packet); //checks for address match
     void printAll(); //prints all variables to console via Serial for testing purposes
     XBeeAddress64 addr; //node address placeholder
-    String loc;
+	int num; //node number for referencing purposes
   private:
     float _temp;
     float _hum;
