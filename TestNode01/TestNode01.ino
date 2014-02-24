@@ -52,7 +52,7 @@ void loop() {
       }
     }
   node1.printAll();
-  node2.printAll();
+  //node2.printAll();
   
   node1.flush();
   node2.flush();

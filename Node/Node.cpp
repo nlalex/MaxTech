@@ -35,7 +35,7 @@ void Node::flush() {
 
 void Node::convertTemp() {
   int temp_analog = _temp;
-  float voltage = temp_analog * 5.0;
+  float voltage = temp_analog * 1.2;
   voltage /= 1024.0;  
   float temperatureC = (voltage - 0.5) * 100 ;
   float temperatureF = ((temperatureC * 9.0) / 5.0) + 32.0;
@@ -43,7 +43,10 @@ void Node::convertTemp() {
 }
 
 void Node::convertHum() {
-
+  int hum_analog = _hum;
+  float hum_voltage = hum_analog * 1.2/1024.0;
+  hum_voltage *= 3.2; //constant defined by voltage divider circuit used
+  _hum = (hum_voltage-0.958)/0.0370; //formula taken from datasheet
 }
 
 void Node::convertMotion() {
@@ -68,7 +71,7 @@ void Node::printAll() {
   Serial.println(addr.getLsb());
   
   Serial.print("Temperature: ");
-  Serial.print(_temp);
+  Serial.println(_temp);
   
   Serial.print("Humidity: ");
   Serial.println(_hum);
