@@ -119,4 +119,18 @@ void Node::stashConvertHub() {
   convertHum();
 }
 
+void Node::testDatabaseSend() {
+  Serial.print(num);
+  Serial.print(',');
+  Serial.print(_temp);
+  Serial.print(',');
+  Serial.print(_hum);
+  Serial.print(',');
+  Serial.print(_ldr1);
+  Serial.print(',');
+  Serial.print(_ldr2);
+  Serial.print(',');
+  Serial.println(_pir);
+}
+
 
