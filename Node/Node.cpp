@@ -12,7 +12,7 @@ Node::Node(XBeeAddress64 addr_in, int num_in) {
   _ldr2 = 0;
   _pir = 0;
  // _motion = 0;
-  if(num == 1) {
+  if(num == HUB_NUM) {
     pinMode(pPIRh, INPUT);
   }
 }
