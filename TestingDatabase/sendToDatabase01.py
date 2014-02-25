@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 
-# Post data to ThingSpeak from one serial output string from Arduino
+# Posts to MESH database for testing without wifi shield
 
 import urllib, urllib2, httplib, datetime, time, serial
 
-KEY = 'ODFI3NCHSTHWOAV7'
+
 PORT = '/dev/ttyACM0' # Port of Arduino
 SPEED = 9600 # Serial communication speed; must match Arduino speed
 
-DATAPTS = 3 # Number of data points being sent to program
+DATAPTS = 6 # Number of data points being sent to program
 
 DEBUG = True # Set true of output is wanted
 
-def send_to_thingspeak(TMP, LDR, CO):
+def send_to_thingspeak(NUM, TEMP, HUM, LDR1, LDR2, PIR):
     try:
-		params = urllib.urlencode({'field1':float(TMP), 'field2':float(LDR), 'field3':float(CO), 'key':KEY})
+		params = urllib.urlencode({'node':int(NUM), 'temp':float(TEMP), 'humidity':float(HUM), 'light1':float(LDR1), 'light2':float(LDR2), 'motion':int(PIR)})
 		headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'text/plain'}
 		conn = httplib.HTTPConnection('api.thingspeak.com')
 		conn.request('POST', '/update', params, headers)
@@ -37,7 +37,7 @@ if __name__ == "__main__":
 		data = get_data(arduino) # Get CSV stream
 		data = data.split(',') # Split into groups
 		if len(data) == DATAPTS: # Checks to make sure all data points are there
-			send_to_thingspeak(data[0], data[1], data[2]) # Sends data points to ThingSpeak
+			send_to_thingspeak(data[0], data[1], data[2], data[3], data[4], data[5]) # Sends data points to ThingSpeak
 			if DEBUG:
 				print data
-			time.sleep(16) # Minimum wait of 15 sec
+			time.sleep(1) # Buffer
