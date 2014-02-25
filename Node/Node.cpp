@@ -11,7 +11,10 @@ Node::Node(XBeeAddress64 addr_in, int num_in) {
   _ldr1 = 0;
   _ldr2 = 0;
   _pir = 0;
-  _motion = 0;
+ // _motion = 0;
+  if(num == 1) {
+    pinMode(pPIRh, INPUT);
+  }
 }
 
 Node::~Node() {}
@@ -24,13 +27,21 @@ void Node::stash(ZBRxIoSampleResponse packet) {
   _pir = packet.isDigitalOn(pPIR);
 }
 
+void Node::stashHub() {
+  _temp = analogRead(pTEMPh);
+  _hum = analogRead(pHUMh);
+  _ldr1 = analogRead(pLDR1h);
+  _ldr2 = analogRead(pLDR2h);
+  _pir = digitalRead(pPIRh);
+}
+
 void Node::flush() {
   _temp = 0;
   _hum = 0;
   _ldr1 = 0;
   _ldr2 = 0;
   _pir = 0;
-  _motion = 0;
+ // _motion = 0;
 }
 
 void Node::convertTemp() {
@@ -54,15 +65,15 @@ void Node::convertHum() {
   // _hum = hum_reading;
 }
 
-void Node::convertMotion() {
-  if(_pir == 0 && _motion == 0) {
-    return;
-  } else {
-    _motion = 1;
-  }
-}
+//void Node::convertMotion() {
+//  if(_pir == 0 && _motion == 0) {
+//    return;
+//  } else {
+//    _motion = 1;
+//  }
+//}
 
-boolean Node::matchAddr(ZBRxIoSampleResponse packet) {
+boolean Node::matchAddress(ZBRxIoSampleResponse packet) {
   if(packet.getRemoteAddress64().getLsb()==addr.getLsb() && packet.getRemoteAddress64().getMsb()==addr.getMsb()) {
     return true;
   } else {
@@ -75,8 +86,8 @@ void Node::printAll() {
   Serial.println(num);
 
   Serial.print("Node Address: ");
-  Serial.print(addr.getMsb());
-  Serial.println(addr.getLsb());
+  Serial.print(addr.getMsb(), HEX);
+  Serial.println(addr.getLsb(), HEX);
   
   Serial.print("Temperature: ");
   Serial.println(_temp);
@@ -91,9 +102,21 @@ void Node::printAll() {
   Serial.println(_ldr2);
   
   Serial.print("Motion: ");
-  Serial.println(_motion);
+  Serial.println(_pir);
   
   Serial.println("");
+}
+
+void Node::stashConvert(ZBRxIoSampleResponse packet) {
+  stash(packet);
+  convertTemp();
+  convertHum();
+}
+
+void Node::stashConvertHub() {
+  stashHub();
+  convertTemp();
+  convertHum();
 }
 
 
