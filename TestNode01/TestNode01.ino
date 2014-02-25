@@ -13,8 +13,9 @@ XBee xbee = XBee();
 ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
 
 #include <Node.h>
-Node node1 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), String("Right"));
-Node node2 = Node(XBeeAddress64(0x435,0x4344), String("Left"));
+Node hub = Node(XBeeAddress64(0,0), 1);
+Node node1 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), 2);
+Node node2 = Node(XBeeAddress64(0x,0x), 3);
 
 void setup()
 {
@@ -39,23 +40,21 @@ void loop() {
     if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
       xbee.getResponse().getZBRxIoSampleResponse(response);
       
-      if(node1.matchAddr(response)) {
-        node1.stash(response);
-        node1.convertTemp();
-        node1.convertHum();
-        node1.convertMotion();
-      } else if(node2.matchAddr(response)) {
-        node2.stash(response);
-        node2.convertTemp();
-        node2.convertHum();
-        node2.convertMotion();
+      if(node1.matchAddress(response)) {
+        node1.stashConvert(response);
+      } else if(node2.matchAddress(response)) {
+        node2.stashConvert(response);
       }
     }
+  hub.stashConvertHub();
+  
   node1.printAll();
   //node2.printAll();
+  hub.printAll();
   
   node1.flush();
   node2.flush();
+  hub.flush();
   }
   
   
