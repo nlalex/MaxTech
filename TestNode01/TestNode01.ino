@@ -3,11 +3,6 @@
 
 // Code modified from: Adafruit.com; Peter H Anderson; xbee-arduino library examples
 
-//#include <SoftwareSerial.h>
-//#define rxPin 10
-//#define txPin 11
-//SoftwareSerial xbeeSerial = SoftwareSerial(rxPin, txPin);
-
 #include <XBee.h>
 XBee xbee = XBee();
 ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
@@ -26,17 +21,28 @@ void setup()
   //xbeeSerial.begin(9600);
   //xbee.setSerial(xbeeSerial);
   xbee.setSerial(Serial1);
+  
+  unsigned long time_elapsed = millis();
 }
  
 
 void loop() {
-  
+  if(time_elapsed >= SEND_TIME) {
+    node1.printAll();
+    node2.printAll();
+    hub.printAll();
+    
+    node1.flush();
+    node2.flush();
+    hub.flush();
+    
+    time_elapsed = 0;
+  }
+
   //attempt to read a packet    
   xbee.readPacket();
-
   if (xbee.getResponse().isAvailable()) {
     // got something
-
     if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
       xbee.getResponse().getZBRxIoSampleResponse(response);
       
@@ -47,16 +53,6 @@ void loop() {
       }
     }
   hub.stashConvertHub();
-  
-  node1.printAll();
-  //node2.printAll();
-  hub.printAll();
-  
-  node1.flush();
-  node2.flush();
-  hub.flush();
   }
-  
-  
 }
 
