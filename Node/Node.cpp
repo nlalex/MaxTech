@@ -54,15 +54,15 @@ void Node::convertTemp() {
 }
 
 void Node::convertHum() {
-  int hum_analog = _hum;
-  float hum_voltage = hum_analog * 1.2/1024.0;
-  hum_voltage *= 3.2; //constant defined by voltage divider circuit used
-  _hum = (hum_voltage-0.958)/0.0370; //formula taken from datasheet
-  // float supply_voltage = 5;
-  // int hum_voltage = 1.2/1023 * _hum *4;
-  // float raw_reading = (hum_voltage/supply_voltage -0.16)/0.0062;
-  // float hum_reading = raw_reading/(1.0546-0.00216*_temp);
-  // _hum = hum_reading;
+  // int hum_analog = _hum;
+  // float hum_voltage = hum_analog * 1.2/1024.0;
+  // hum_voltage *= 3.2; //constant defined by voltage divider circuit used
+  // _hum = (hum_voltage-0.958)/0.0370; //formula taken from datasheet
+  float supply_voltage = 5.;
+  float hum_voltage = 1.2/1023. * _hum *4.;
+  float raw_reading = (hum_voltage/supply_voltage -0.16)/0.0062;
+  float hum_reading = raw_reading/(1.0546-0.00216*((_temp-32.)*5./9.));
+  _hum = hum_reading;
 }
 
 //void Node::convertMotion() {

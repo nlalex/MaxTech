@@ -17,7 +17,7 @@ class Node {
 //    void convertMotion(); //allows any motion within reporting window to be recongnized
     boolean matchAddress(ZBRxIoSampleResponse packet); //checks for address match
     void printAll(); //prints all variables to console via Serial for testing purposes
-    void stashConvert(); //saves & converts data
+    void stashConvert(ZBRxIoSampleResponse packet); //saves & converts data
     void stashConvertHub(); //same as above but for hub
     void testDatabaseSend(); //formats data as .csv and sends to python script via Serial
     XBeeAddress64 addr; //node address placeholder

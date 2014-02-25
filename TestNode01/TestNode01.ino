@@ -10,7 +10,9 @@ ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
 #include <Node.h>
 Node hub = Node(HUB_ADDR, HUB_NUM);
 Node node1 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), 1);
-Node node2 = Node(XBeeAddress64(0x,0x), 2);
+Node node2 = Node(XBeeAddress64(0,0), 2);
+
+unsigned long last_time;
 
 void setup()
 {
@@ -22,21 +24,22 @@ void setup()
   //xbee.setSerial(xbeeSerial);
   xbee.setSerial(Serial1);
   
-  unsigned long time_elapsed = millis();
+  last_time = millis();
 }
  
 
 void loop() {
-  if(time_elapsed >= SEND_TIME) {
-    node1.printAll();
-    node2.printAll();
-    hub.printAll();
+  if(millis()-last_time >= SEND_TIME) {
+    //node1.printAll();
+    //node2.printAll();
+    //hub.printAll();
+    //hub.testDatabaseSend();
     
     node1.flush();
     node2.flush();
     hub.flush();
     
-    time_elapsed = 0;
+    last_time = millis();
   }
 
   //attempt to read a packet    
@@ -48,6 +51,8 @@ void loop() {
       
       if(node1.matchAddress(response)) {
         node1.stashConvert(response);
+        node1.printAll();
+        node1.flush();
       } else if(node2.matchAddress(response)) {
         node2.stashConvert(response);
       }
