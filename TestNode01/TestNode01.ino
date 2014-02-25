@@ -8,9 +8,9 @@ XBee xbee = XBee();
 ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
 
 #include <Node.h>
-Node hub = Node(XBeeAddress64(0,0), 1);
-Node node1 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), 2);
-Node node2 = Node(XBeeAddress64(0x,0x), 3);
+Node hub = Node(XBeeAddress64(0,0), 0);
+Node node1 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), 1);
+Node node2 = Node(XBeeAddress64(0x,0x), 2);
 
 void setup()
 {
