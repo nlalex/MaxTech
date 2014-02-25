@@ -19,6 +19,7 @@ class Node {
     void printAll(); //prints all variables to console via Serial for testing purposes
     void stashConvert(); //saves & converts data
     void stashConvertHub(); //same as above but for hub
+    void testDatabaseSend(); //formats data as .csv and sends to python script via Serial
     XBeeAddress64 addr; //node address placeholder
     int num; //node number for referencing purposes
   private:
