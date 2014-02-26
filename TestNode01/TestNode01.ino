@@ -9,8 +9,8 @@ ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
 
 #include <Node.h>
 Node hub = Node(HUB_ADDR, HUB_NUM);
-Node node1 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), 1);
-Node node2 = Node(XBeeAddress64(0,0), 2);
+Node node1 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), 2);
+Node node2 = Node(XBeeAddress64(0,0), 3);
 
 unsigned long last_time;
 
@@ -51,7 +51,8 @@ void loop() {
       
       if(node1.matchAddress(response)) {
         node1.stashConvert(response);
-        node1.printAll();
+        //node1.printAll();
+        node1.testDatabaseSend();
         node1.flush();
       } else if(node2.matchAddress(response)) {
         node2.stashConvert(response);
