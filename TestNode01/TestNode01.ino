@@ -9,8 +9,11 @@ ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
 
 #include <Node.h>
 Node hub = Node(HUB_ADDR, HUB_NUM);
-Node node1 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), 2);
-Node node2 = Node(XBeeAddress64(0,0), 3);
+Node node2 = Node(XBeeAddress64(0x0013A200,0x40ABB7F7), 2);
+Node node3 = Node(XBeeAddress64(0x0013A200,0x40AEB88F), 3);
+Node node4 = Node(XBeeAddress64(0x0013A200,0x40AEBA2C), 4);
+Node node5 = Node(XBeeAddress64(0x0013A200,0x40AEB9AA), 5);
+Node node6 = Node(XBeeAddress64(0x0013A200,0x40AEB9C3), 6);
 
 unsigned long last_time;
 
@@ -35,9 +38,10 @@ void loop() {
     //hub.printAll();
     //hub.testDatabaseSend();
     
-    node1.flush();
-    node2.flush();
-    hub.flush();
+    //hub.stashConvertHub();
+    //hub.printAll();
+    //hub.testDatabaseSend();
+    //hub.flush();
     
     last_time = millis();
   }
@@ -49,16 +53,33 @@ void loop() {
     if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
       xbee.getResponse().getZBRxIoSampleResponse(response);
       
-      if(node1.matchAddress(response)) {
-        node1.stashConvert(response);
-        //node1.printAll();
-        node1.testDatabaseSend();
-        node1.flush();
-      } else if(node2.matchAddress(response)) {
+      if(node2.matchAddress(response)) {
         node2.stashConvert(response);
+        node2.printAll();
+        //node2.testDatabaseSend();
+        node2.flush();
+      } else if(node3.matchAddress(response)) {
+        node3.stashConvert(response);
+        node3.printAll();
+        //node3.testDatabaseSend();
+        node3.flush();
+      } else if(node4.matchAddress(response)) {
+        node4.stashConvert(response);
+        node4.printAll();
+        //node4.testDatabaseSend();
+        node4.flush();
+      } else if(node5.matchAddress(response)) {
+        node5.stashConvert(response);
+        node5.printAll();
+        //node5.testDatabaseSend();
+        node5.flush();
+      } else if(node6.matchAddress(response)) {
+        node6.stashConvert(response);
+        node6.printAll();
+        //node6.testDatabaseSend();
+        node6.flush();
       }
     }
-  hub.stashConvertHub();
   }
 }
 
