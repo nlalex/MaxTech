@@ -22,9 +22,12 @@ class Node {
     void testDatabaseSend(); //formats data as .csv and sends to python script via Serial
     XBeeAddress64 addr; //node address placeholder
     int num; //node number for referencing purposes
+	float tAdjust; //temperature adjustment factor
+	float hAdjust; //humidity adjustment factor
+	float temp;
+    float hum;
+	boolean trip; //whether or not node has been activated
   private:
-    float _temp;
-    float _hum;
     int _ldr1;
     int _ldr2;
     int _pir; //temporary motion holder for raw data

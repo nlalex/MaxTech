@@ -15,9 +15,8 @@ Node node4 = Node(XBeeAddress64(0x0013A200,0x40AEBA2C), 4);
 Node node5 = Node(XBeeAddress64(0x0013A200,0x40AEB9AA), 5);
 Node node6 = Node(XBeeAddress64(0x0013A200,0x40AEB9C3), 6);
 
-Node nodes[] = {node2, node3, node4, node5, node6};
-int nodeCount = 5;
-
+Node nodes[] = {node2, node3, node4, node5, node6}; //Array containing previously defined Nodes
+int nodeCount = 5; //Number of nodes excluding the hub
 unsigned long last_time;
 
 void setup()
@@ -29,6 +28,8 @@ void setup()
   //xbeeSerial.begin(9600);
   //xbee.setSerial(xbeeSerial);
   xbee.setSerial(Serial1);
+  
+  setEqual();
   
   last_time = millis();
 }
@@ -95,3 +96,46 @@ void loop() {
   }
 }
 
+void setEqual() {  
+  Serial.println("Beginning calibaration process...");
+  
+  int tripCount = 0;
+  
+  while(tripCount != nodeCount) {
+    tripCount = 0;
+    xbee.readPacket();
+    if (xbee.getResponse().isAvailable()) {
+      if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
+        xbee.getResponse().getZBRxIoSampleResponse(response);
+        
+        for(int i=0; i < nodeCount; i++) {
+          if(nodes[i].matchAddress(response)) {
+            nodes[i].stashConvert(response);
+          }
+        }
+      }
+    }
+    
+    for(int i=0; i < nodeCount; i++) {
+      if(nodes[i].trip == true) {
+        tripCount++;
+      }
+    }
+  }
+  
+  hub.stashConvertHub();
+  
+  Serial.println("Calibration completed.");
+  Serial.println("Reference values (node, temperature adjustment, humidity adjustment)");
+  
+  for(int i=0; i < nodeCount; i++) {
+    nodes[i].tAdjust = hub.temp - nodes[i].temp;
+    nodes[i].hAdjust = hub.hum - nodes[i].hum;
+    Serial.print("Node ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.print(nodes[i].tAdjust);
+    Serial.print(", ");
+    Serial.println(nodes[i].hAdjust);
+  }
+}
