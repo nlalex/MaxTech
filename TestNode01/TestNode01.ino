@@ -24,6 +24,8 @@ Node nodes[] = {node2, node3, node4, node5, node6}; //Array containing previousl
 int nodeCount = 5; //Number of nodes excluding the hub
 
 unsigned long last_time; //Used for timing routines
+unsigned long send_time = 30000; //amount of time program sits collecting data before moving on
+unsigned long wait_time = 20000; //maximum wait time for calibration routine
 
 void setup()
 {
@@ -41,7 +43,7 @@ void setup()
  
 
 void loop() {
-  if(millis()-last_time >= SEND_TIME) { //Timed loop functions
+  if(millis()-last_time >= send_time) { //Timed loop functions
     
     last_time = millis();
   }
@@ -75,54 +77,59 @@ void setEqual() {
   
   int tripCount = 0;
   
-  while(tripCount != nodeCount) {
+  last_time = millis();
+  
+  while(tripCount != nodeCount && millis() - last_time <= wait_time) { //wait until all nodes are accounted for or times out
     tripCount = 0;
     xbee.readPacket();
     if (xbee.getResponse().isAvailable()) {
       if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
         xbee.getResponse().getZBRxIoSampleResponse(response);
-        
         for(int i=0; i < nodeCount; i++) {
           if(nodes[i].matchAddress(response)) {
             nodes[i].stashConvert(response);
+            if(DEBUG) {
+              Serial.print("Node ");
+              Serial.print(i);
+              Serial.println(" responded.")
+            }
           }
         }
       }
     }
-    
-    for(int i=0; i < nodeCount; i++) {
-      if(nodes[i].trip == true) {
-        tripCount++;
-        if(DEBUG) {
-          Serial.print(tripCount);
-          Serial.print(" of ");
-          Serial.print(nodeCount);
-          Serial.println(" nodes accounted for.");
-        }
-      }
-    }
   }
-  
-  hub.stashConvertHub();
   
   if(DEBUG) {
-    Serial.println("Calibration completed.");
-    Serial.println("Reference values (node, temperature adjustment, humidity adjustment)");
+    Serial.print(tripCount);
+    Serial.print(" of ");
+    Serial.print(nodeCount);
+    Serial.println(" nodes accounted for.");
   }
   
-  for(int i=0; i < nodeCount; i++) {
-    nodes[i].tAdjust = hub.temp - nodes[i].temp;
-    nodes[i].hAdjust = hub.hum - nodes[i].hum;
-    
+  if(tripCount == nodeCount) {
+    hub.stashConvertHub();
+  
     if(DEBUG) {
-      Serial.print("Node ");
-      Serial.print(i+2);
-      Serial.print(": ");
-      Serial.print(nodes[i].tAdjust);
-      Serial.print(", ");
-      Serial.println(nodes[i].hAdjust);
-      Serial.println("");
+      Serial.println("Calibration completed.");
+      Serial.println("Reference values (node, temperature adjustment, humidity adjustment)");
     }
+  
+    for(int i=0; i < nodeCount; i++) {
+      nodes[i].tAdjust = hub.temp - nodes[i].temp;
+      nodes[i].hAdjust = hub.hum - nodes[i].hum;
+    
+      if(DEBUG) {
+        Serial.print("Node ");
+        Serial.print(i+2);
+        Serial.print(": ");
+        Serial.print(nodes[i].tAdjust);
+        Serial.print(", ");
+        Serial.println(nodes[i].hAdjust);
+        Serial.println("");
+      }
+    }
+  } else { //if not all nodes accounted for
+    if(DEBUG) Serial.println("Calibration unsuccessful");
   }
 }
 
