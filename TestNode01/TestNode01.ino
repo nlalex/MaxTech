@@ -3,6 +3,8 @@
 
 // Code modified from: Adafruit.com; Peter H Anderson; xbee-arduino library examples
 
+const boolean DEBUG = true;
+
 #include <XBee.h>
 XBee xbee = XBee();
 ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
@@ -17,35 +19,26 @@ Node node6 = Node(XBeeAddress64(0x0013A200,0x40AEB9C3), 6);
 
 Node nodes[] = {node2, node3, node4, node5, node6}; //Array containing previously defined Nodes
 int nodeCount = 5; //Number of nodes excluding the hub
-unsigned long last_time;
+
+unsigned long last_time; //Used for timing routines
 
 void setup()
 {
   Serial.begin(9600); //For communication to/from computer
  
   Serial1.begin(9600); //For communication to/from XBee with Mega
-  //Serial1.begin(9600); //For communication to/from XBee
-  //xbeeSerial.begin(9600);
-  //xbee.setSerial(xbeeSerial);
   xbee.setSerial(Serial1);
   
-  setEqual();
+  if(digitalRead(pCAL) == HIGH) {
+    setEqual();
+  }
   
   last_time = millis();
 }
  
 
 void loop() {
-  if(millis()-last_time >= SEND_TIME) {
-    //node1.printAll();
-    //node2.printAll();
-    //hub.printAll();
-    //hub.testDatabaseSend();
-    
-    //hub.stashConvertHub();
-    //hub.printAll();
-    //hub.testDatabaseSend();
-    //hub.flush();
+  if(millis()-last_time >= SEND_TIME) { //Timed loop functions
     
     last_time = millis();
   }
@@ -61,43 +54,21 @@ void loop() {
         if(nodes[i].matchAddress(response)) {
           nodes[i].stashConvert(response);
           nodes[i].printAll();
-          nodes[i].testDatabaseSend();
+//          nodes[i].testDatabaseSend();
           nodes[i].flush();
         }
       }
-      
-//      if(node2.matchAddress(response)) {
-//        node2.stashConvert(response);
-//        node2.printAll();
-//        //node2.testDatabaseSend();
-//        node2.flush();
-//      } else if(node3.matchAddress(response)) {
-//        node3.stashConvert(response);
-//        node3.printAll();
-//        //node3.testDatabaseSend();
-//        node3.flush();
-//      } else if(node4.matchAddress(response)) {
-//        node4.stashConvert(response);
-//        node4.printAll();
-//        //node4.testDatabaseSend();
-//        node4.flush();
-//      } else if(node5.matchAddress(response)) {
-//        node5.stashConvert(response);
-//        node5.printAll();
-//        //node5.testDatabaseSend();
-//        node5.flush();
-//      } else if(node6.matchAddress(response)) {
-//        node6.stashConvert(response);
-//        node6.printAll();
-//        //node6.testDatabaseSend();
-//        node6.flush();
-//      }
     }
   }
 }
 
+
+
+
 void setEqual() {  
-  Serial.println("Beginning calibaration process...");
+  if(DEBUG){
+    Serial.println("Beginning calibaration process...");
+  }
   
   int tripCount = 0;
   
@@ -119,23 +90,35 @@ void setEqual() {
     for(int i=0; i < nodeCount; i++) {
       if(nodes[i].trip == true) {
         tripCount++;
+        if(DEBUG) {
+          Serial.print(tripCount);
+          Serial.print(" of ");
+          Serial.print(nodeCount);
+          Serial.println(" nodes accounted for.");
+        }
       }
     }
   }
   
   hub.stashConvertHub();
   
-  Serial.println("Calibration completed.");
-  Serial.println("Reference values (node, temperature adjustment, humidity adjustment)");
+  if(DEBUG) {
+    Serial.println("Calibration completed.");
+    Serial.println("Reference values (node, temperature adjustment, humidity adjustment)");
+  }
   
   for(int i=0; i < nodeCount; i++) {
     nodes[i].tAdjust = hub.temp - nodes[i].temp;
     nodes[i].hAdjust = hub.hum - nodes[i].hum;
-    Serial.print("Node ");
-    Serial.print(i);
-    Serial.print(": ");
-    Serial.print(nodes[i].tAdjust);
-    Serial.print(", ");
-    Serial.println(nodes[i].hAdjust);
+    
+    if(DEBUG) {
+      Serial.print("Node ");
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.print(nodes[i].tAdjust);
+      Serial.print(", ");
+      Serial.println(nodes[i].hAdjust);
+      Serial.println("");
+    }
   }
 }
