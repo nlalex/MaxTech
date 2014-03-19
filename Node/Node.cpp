@@ -55,7 +55,7 @@ void Node::convertTemp() {
   voltage /= 1024.0;  
   float temperatureC = (voltage - 0.5) * 100 ;
   float temperatureF = ((temperatureC * 9.0) / 5.0) + 32.0;
-  temp = temperatureF;
+  temp = temperatureF + tAdjust;
 }
 
 void Node::convertHum() {
@@ -67,7 +67,7 @@ void Node::convertHum() {
   float hum_voltage = 1.2/1023. * hum *4.;
   float raw_reading = (hum_voltage/supply_voltage -0.16)/0.0062;
   float hum_reading = raw_reading/(1.0546-0.00216*((temp-32.)*5./9.));
-  hum = hum_reading;
+  hum = hum_reading + hAdjust;
 }
 
 //void Node::convertMotion() {
