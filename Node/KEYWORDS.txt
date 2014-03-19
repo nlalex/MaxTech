@@ -1,6 +1,11 @@
 Node KEYWORD1
 stash KEYWORD2
+stashHub KEYWORD2
 flush KEYWORD2
 convertTemp KEYWORD2
 convertHum KEYWORD2
-convertMotion KEYWORD2
+matchAddress KEYWORD2
+printAll KEYWORD2
+stashConvert KEYWORD2
+stashConvertHub KEYWORD2
+testDatabaseSend KEYWORD2
