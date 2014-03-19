@@ -5,6 +5,9 @@
 
 const boolean DEBUG = true;
 
+const float lowTemp = 70.0;
+const float highTemp = 75.0;
+
 #include <XBee.h>
 XBee xbee = XBee();
 ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
@@ -113,12 +116,89 @@ void setEqual() {
     
     if(DEBUG) {
       Serial.print("Node ");
-      Serial.print(i);
+      Serial.print(i+2);
       Serial.print(": ");
       Serial.print(nodes[i].tAdjust);
       Serial.print(", ");
       Serial.println(nodes[i].hAdjust);
       Serial.println("");
     }
+  }
+}
+
+
+void control1() { //control scheme using single reference temperature (hub temp)
+  if(DEBUG)  Serial.println("Beginning deadband control checks with single reference...");
+
+  if(hub.trip) {
+    if(hub.temp > highTemp) {
+      //actuate to lower all temps
+      if(DEBUG) Serial.println("Temperatures need lowered.");
+      for(int i=0; i < nodeCount; i++) {}
+    } else if(hub.temp < lowTemp) {
+      //actuate to raise temp
+      if(DEBUG) Serial.println("Temperatures need raised.");
+      for(int i=0; i < nodeCount; i++) {}
+    } else {
+      //do nothing
+      if(DEBUG) Serial.println("Temperatures are good.");
+    }
+  } else {
+    //data not received from hub
+    if(DEBUG) Serial.println("Hub contains null data.");
+  }
+  
+  if(DEBUG) {
+    Serial.println("Control checks completed.");
+    Serial.println("");
+  }
+}
+
+
+void control2() { //control scheme using individual node temperatures
+  if(DEBUG)  Serial.println("Beginning deadband control checks with individual references...");
+  
+  if(hub.trip) {
+    if(hub.temp > highTemp) {
+      //actuate to lower temp
+      if(DEBUG) Serial.println("Hub temperature needs lowered.");
+    } else if(hub.temp < lowTemp) {
+      //actuate to raise temp
+      if(DEBUG) Serial.println("Hub temperature needs raised.");
+    } else {
+      //do nothing
+      if(DEBUG) Serial.println("Hub temperature is good.");
+    }
+  } else {
+    //data not received from hub
+    if(DEBUG) Serial.println("Hub contains null data.");
+  }
+    
+  
+  for(int i=0; i < nodeCount; i++) {
+    if(DEBUG) {
+      Serial.print("Node ");
+      Serial.print(i+2);
+    }
+    if(nodes[i].trip) {
+      if(nodes[i].temp > highTemp) {
+        //actuate to lower temp
+        if(DEBUG)  Serial.println(" temperature needs lowered.");
+      } else if(nodes[i].temp < lowTemp) {
+        //actuate to raise temp
+        if(DEBUG) Serial.println(" temperature needs raised.");
+      } else {
+        //do nothing
+        if(DEBUG) Serial.println(" temperature is good.");
+      }
+    } else {
+      //data not received from node
+      if(DEBUG) Serial.println(" contains null data.");
+    }
+  }
+  
+  if(DEBUG) {
+    Serial.println("Control checks completed.");
+    Serial.println("");
   }
 }
