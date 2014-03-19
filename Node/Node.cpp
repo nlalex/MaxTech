@@ -13,7 +13,7 @@ Node::Node(XBeeAddress64 addr_in, int num_in) {
   _pir = 0;
   tAdjust = 0;
   hAdjust = 0;
-  trip = 0;
+  trip = false;
  // _motion = 0;
   if(num == HUB_NUM) {
     pinMode(pPIRh, INPUT);
