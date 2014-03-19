@@ -1,5 +1,4 @@
 //Other constants
-const unsigned long SEND_TIME = 5100; //wait time between sending, in milliseconds
 const int HUB_NUM = 1;
 const XBeeAddress64 HUB_ADDR = XBeeAddress64(0,0);
 
