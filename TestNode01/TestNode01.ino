@@ -24,7 +24,7 @@ Node nodes[] = {node2, node3, node4, node5, node6}; //Array containing previousl
 int nodeCount = 5; //Number of nodes excluding the hub
 
 unsigned long last_time; //Used for timing routines
-unsigned long send_time = 30000; //amount of time program sits collecting data before moving on
+unsigned long send_time = 5000; //amount of time program sits collecting data before moving on
 unsigned long wait_time = 20000; //maximum wait time for calibration routine
 
 void setup()
@@ -44,26 +44,26 @@ void setup()
 
 void loop() {
   if(millis()-last_time >= send_time) { //Timed loop functions
-    
-    last_time = millis();
-  }
-
-  //attempt to read a packet    
-  xbee.readPacket();
-  if (xbee.getResponse().isAvailable()) {
-    // got something
-    if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
-      xbee.getResponse().getZBRxIoSampleResponse(response);
+    //attempt to read a packet    
+    xbee.readPacket();
+    if (xbee.getResponse().isAvailable()) {
+      // got something
+      if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
+        xbee.getResponse().getZBRxIoSampleResponse(response);
       
-      for(int i=0; i < nodeCount; i++) {
-        if(nodes[i].matchAddress(response)) {
-          nodes[i].stashConvert(response);
-          nodes[i].printAll();
-//          nodes[i].testDatabaseSend();
-          nodes[i].flush();
+        for(int i=0; i < nodeCount; i++) {
+          if(nodes[i].matchAddress(response)) {
+            nodes[i].stashConvert(response);
+            nodes[i].flush();
+          }
         }
       }
     }
+    last_time = millis();
+  }
+  
+  for(int i=0; i < nodeCount; i++) {
+    nodes[i].printAll();
   }
 }
 
