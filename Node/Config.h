@@ -10,10 +10,12 @@ const int pLDR2 = 3;
 const int pPIR = 4;
 
 //Arduino IO pinout
-const int pTEMPh = 0;
-const int pHUMh = 1;
+const int pTEMPh = 1;
+const int pHUMh = 0;
 const int pLDR1h = 2;
 const int pLDR2h = 3;
+
+const int pPIRh = 2; //digital
 const int pCAL = 4; //to be used with setEqual() routine
 
-const int pPIRh = 0;
+

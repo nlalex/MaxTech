@@ -13,18 +13,18 @@ XBee xbee = XBee();
 ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
 
 #include <Node.h>
-Node hub = Node(HUB_ADDR, HUB_NUM);
+Node hub = Node(HUB_ADDR, HUB_NUM); //hub addr: 40ABB77F
 Node node2 = Node(XBeeAddress64(0x0013A200,0x40ABB9A8), 2); //black
 Node node3 = Node(XBeeAddress64(0x0013A200,0x40ABB9DE), 3); //yellow
-Node node4 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), 4); //blue
+Node node4 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), 4); //white
 Node node5 = Node(XBeeAddress64(0x0013A200,0x40ABAE96), 5); //red
-Node node6 = Node(XBeeAddress64(0x0013A200,0x40AD57DA), 6); //white
+Node node6 = Node(XBeeAddress64(0x0013A200,0x40AD57DA), 6); //blue
 
 Node nodes[] = {node2, node3, node4, node5, node6}; //Array containing previously defined Nodes
 int nodeCount = 5; //Number of nodes excluding the hub
 
 unsigned long last_time; //Used for timing routines
-unsigned long send_time = 5000; //amount of time program sits collecting data before moving on
+unsigned long send_time = 500; //amount of time program sits collecting data before moving on
 unsigned long wait_time = 20000; //maximum wait time for calibration routine
 
 void setup()
@@ -43,7 +43,7 @@ void setup()
  
 
 void loop() {
-  if(millis()-last_time >= send_time) { //Timed loop functions
+  if(millis()-last_time <= send_time) { //Timed loop functions
     //attempt to read a packet    
     xbee.readPacket();
     if (xbee.getResponse().isAvailable()) {
@@ -54,16 +54,30 @@ void loop() {
         for(int i=0; i < nodeCount; i++) {
           if(nodes[i].matchAddress(response)) {
             nodes[i].stashConvert(response);
+            Serial.print("Stored data ");
+            Serial.println(i);
+            nodes[i].printAll();
+            Serial.println(nodes[i].temp);
+            Serial.println(nodes[i].tAdjust);
             nodes[i].flush();
+            
+            //nodes[i].flush();
           }
         }
       }
     }
-    last_time = millis();
-  }
+    //last_time = millis();
+  } else {
   
-  for(int i=0; i < nodeCount; i++) {
-    nodes[i].printAll();
+    for(int i=0; i < nodeCount; i++) {
+     // nodes[i].printAll();
+      //nodes[i].flush();
+    }
+    
+    hub.stashConvertHub();
+    hub.printAll();
+    
+    last_time = millis();
   }
 }
 
@@ -91,7 +105,7 @@ void setEqual() {
             if(DEBUG) {
               Serial.print("Node ");
               Serial.print(i);
-              Serial.println(" responded.")
+              Serial.println(" responded.");
             }
           }
         }

@@ -13,7 +13,9 @@ class Node {
     void stashHub(); //gets all data for hub 'node'
     void flush(); //resets all class variables to 0
     void convertTemp(); //converts analog value to temperature in degF
+	void convertTempHub();
     void convertHum();
+	void convertHumHub();
 //    void convertMotion(); //allows any motion within reporting window to be recongnized
     boolean matchAddress(ZBRxIoSampleResponse packet); //checks for address match
     void printAll(); //prints all variables to console via Serial for testing purposes

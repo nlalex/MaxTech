@@ -58,6 +58,15 @@ void Node::convertTemp() {
   temp = temperatureF + tAdjust;
 }
 
+void Node::convertTempHub() {
+  int temp_analog = temp;
+  float voltage = temp_analog * 5.0;
+  voltage /= 1024.0;  
+  float temperatureC = (voltage - 0.5) * 100 ;
+  float temperatureF = ((temperatureC * 9.0) / 5.0) + 32.0;
+  temp = temperatureF + tAdjust;
+}
+
 void Node::convertHum() {
   // int hum_analog = hum;
   // float hum_voltage = hum_analog * 1.2/1024.0;
@@ -65,6 +74,18 @@ void Node::convertHum() {
   // hum = (hum_voltage-0.958)/0.0370; //formula taken from datasheet
   float supply_voltage = 5.;
   float hum_voltage = 1.2/1023. * hum *4.;
+  float raw_reading = (hum_voltage/supply_voltage -0.16)/0.0062;
+  float hum_reading = raw_reading/(1.0546-0.00216*((temp-32.)*5./9.));
+  hum = hum_reading + hAdjust;
+}
+
+void Node::convertHumHub() {
+  // int hum_analog = hum;
+  // float hum_voltage = hum_analog * 1.2/1024.0;
+  // hum_voltage *= 3.2; //constant defined by voltage divider circuit used
+  // hum = (hum_voltage-0.958)/0.0370; //formula taken from datasheet
+  float supply_voltage = 5.;
+  float hum_voltage = 5.0/1023. * hum *4.;
   float raw_reading = (hum_voltage/supply_voltage -0.16)/0.0062;
   float hum_reading = raw_reading/(1.0546-0.00216*((temp-32.)*5./9.));
   hum = hum_reading + hAdjust;
@@ -120,8 +141,8 @@ void Node::stashConvert(ZBRxIoSampleResponse packet) {
 
 void Node::stashConvertHub() {
   stashHub();
-  convertTemp();
-  convertHum();
+  convertTempHub();
+  convertHumHub();
 }
 
 void Node::testDatabaseSend() {
