@@ -5,8 +5,8 @@
 
 const boolean DEBUG = true;
 
-const float lowTemp = 70.0;
-const float highTemp = 75.0;
+const float lowTemp = 69.0;
+const float highTemp = 72.0;
 
 #include <XBee.h>
 XBee xbee = XBee();
@@ -22,6 +22,9 @@ Node node6 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), 6); //blue
 
 Node nodes[] = {node2, node3, node4, node5, node6}; //Array containing previously defined Nodes
 int nodeCount = 5; //Number of nodes excluding the hub
+
+const int pHeaters[] = {22, 23, 24, 25, 26, 27};
+const int heaterCount = 6;
 
 unsigned long last_time; //Used for timing routines
 unsigned long send_time = 10000; //amount of time program sits collecting data before moving on
@@ -39,6 +42,10 @@ void setup()
   }
   
   last_time = millis();
+  
+  for(int i=0; i<heaterCount; i++) {
+    pinMode(pHeaters[i], OUTPUT);
+  }
 }
  
 
@@ -71,6 +78,10 @@ void loop() {
     //last_time = millis();
   } else {
   
+    hub.stashConvertHub();
+    hub.printAll();
+    hub.flush();
+    
     for(int i=0; i < nodeCount; i++) {
       nodes[i].printAll();
       nodes[i].flush();
@@ -78,11 +89,7 @@ void loop() {
     }
 //    Serial.println("");
     
-    hub.stashConvertHub();
-    hub.printAll();
-    hub.flush();
-    
-    
+    control1();
     
     last_time = millis();
   }
@@ -147,7 +154,6 @@ void setEqual() {
         Serial.print(nodes[i].tAdjust);
         Serial.print(", ");
         Serial.println(nodes[i].hAdjust);
-        Serial.println("");
       }
     }
   } else { //if not all nodes accounted for
@@ -158,16 +164,22 @@ void setEqual() {
 
 void control1() { //control scheme using single reference temperature (hub temp)
   if(DEBUG)  Serial.println("Beginning deadband control checks with single reference...");
-
+  
+  hub.stashConvertHub();
+  
   if(hub.trip) {
     if(hub.temp > highTemp) {
       //actuate to lower all temps
       if(DEBUG) Serial.println("Temperatures need lowered.");
-      for(int i=0; i < nodeCount; i++) {}
+      for(int i=0; i < heaterCount; i++) {
+        digitalWrite(pHeaters[i], HIGH); //high turns heaters on
+      }
     } else if(hub.temp < lowTemp) {
       //actuate to raise temp
       if(DEBUG) Serial.println("Temperatures need raised.");
-      for(int i=0; i < nodeCount; i++) {}
+      for(int i=0; i < heaterCount; i++) {
+        digitalWrite(pHeaters[i], LOW); //low turns heaters on
+      }
     } else {
       //do nothing
       if(DEBUG) Serial.println("Temperatures are good.");
@@ -229,5 +241,12 @@ void control2() { //control scheme using individual node temperatures
   if(DEBUG) {
     Serial.println("Control checks completed.");
     Serial.println("");
+  }
+}
+
+void printCSV() {
+  for(int i=0; i<nodeCount; i++) {
+    Serial.print(nodes[i].temp);
+    Serial.print(",");
   }
 }

@@ -37,6 +37,7 @@ void Node::stashHub() {
   _ldr1 = analogRead(pLDR1h);
   _ldr2 = analogRead(pLDR2h);
   _pir = digitalRead(pPIRh);
+  trip = true;
 }
 
 void Node::flush() {
