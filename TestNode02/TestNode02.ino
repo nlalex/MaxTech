@@ -16,9 +16,9 @@ ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
 Node hub = Node(HUB_ADDR, HUB_NUM); //hub addr: 40ABB77F
 Node node2 = Node(XBeeAddress64(0x0013A200,0x40ABB9A8), 2); //black
 Node node3 = Node(XBeeAddress64(0x0013A200,0x40ABB9DE), 3); //yellow
-Node node4 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), 4); //white
+Node node4 = Node(XBeeAddress64(0x0013A200,0x40AD57DA), 4); //white
 Node node5 = Node(XBeeAddress64(0x0013A200,0x40ABAE96), 5); //red
-Node node6 = Node(XBeeAddress64(0x0013A200,0x40AD57DA), 6); //blue
+Node node6 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), 6); //blue 
 
 Node nodes[] = {node2, node3, node4, node5, node6}; //Array containing previously defined Nodes
 int nodeCount = 5; //Number of nodes excluding the hub
@@ -78,9 +78,9 @@ void loop() {
     }
 //    Serial.println("");
     
-//    hub.stashConvertHub();
-//    hub.printAll();
-//    hub.flush();
+    hub.stashConvertHub();
+    hub.printAll();
+    hub.flush();
     
     
     
@@ -111,10 +111,11 @@ void setEqual() {
             nodes[i].stashConvert(response);
             if(DEBUG) {
               Serial.print("Node ");
-              Serial.print(i);
+              Serial.print(i+2);
               Serial.println(" responded.");
             }
           }
+          tripCount += nodes[i].trip;
         }
       }
     }

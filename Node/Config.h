@@ -16,6 +16,6 @@ const int pLDR1h = 2;
 const int pLDR2h = 3;
 
 const int pPIRh = 2; //digital
-const int pCAL = 4; //to be used with setEqual() routine
+const int pCAL = 8; //to be used with setEqual() routine
 
 
