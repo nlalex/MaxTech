@@ -24,7 +24,7 @@ Node nodes[] = {node2, node3, node4, node5, node6}; //Array containing previousl
 int nodeCount = 5; //Number of nodes excluding the hub
 
 unsigned long last_time; //Used for timing routines
-unsigned long send_time = 500; //amount of time program sits collecting data before moving on
+unsigned long send_time = 10000; //amount of time program sits collecting data before moving on
 unsigned long wait_time = 20000; //maximum wait time for calibration routine
 
 void setup()
@@ -54,12 +54,14 @@ void loop() {
         for(int i=0; i < nodeCount; i++) {
           if(nodes[i].matchAddress(response)) {
             nodes[i].stashConvert(response);
-            Serial.print("Stored data ");
-            Serial.println(i);
-            nodes[i].printAll();
-            Serial.println(nodes[i].temp);
-            Serial.println(nodes[i].tAdjust);
-            nodes[i].flush();
+//            Serial.print("Stored data ");
+//            Serial.println(i);
+//            nodes[i].printAll();
+//            nodes[i].flush();
+//            nodes[i].printAll();
+//            Serial.println(nodes[i].temp);
+//            Serial.println(nodes[i].tAdjust);
+//            nodes[i].flush();
             
             //nodes[i].flush();
           }
@@ -70,12 +72,17 @@ void loop() {
   } else {
   
     for(int i=0; i < nodeCount; i++) {
-     // nodes[i].printAll();
-      //nodes[i].flush();
+      nodes[i].printAll();
+      nodes[i].flush();
+       // Serial.print(nodes[i].trip);
     }
+//    Serial.println("");
     
-    hub.stashConvertHub();
-    hub.printAll();
+//    hub.stashConvertHub();
+//    hub.printAll();
+//    hub.flush();
+    
+    
     
     last_time = millis();
   }
