@@ -3,7 +3,7 @@
 
 // Code modified from: Adafruit.com; Peter H Anderson; xbee-arduino library examples
 
-const boolean DEBUG = true;
+const boolean DEBUG = false;
 
 const float lowTemp = 69.0;
 const float highTemp = 72.0;
@@ -27,7 +27,7 @@ const int pHeaters[] = {22, 23, 24, 25, 26, 27};
 const int heaterCount = 6;
 
 unsigned long last_time; //Used for timing routines
-unsigned long send_time = 10000; //amount of time program sits collecting data before moving on
+unsigned long send_time = 5000; //amount of time program sits collecting data before moving on
 unsigned long wait_time = 20000; //maximum wait time for calibration routine
 
 void setup()
@@ -79,6 +79,8 @@ void loop() {
   } else {
   
     hub.stashConvertHub();
+    
+//    printCSV();
     hub.printAll();
     hub.flush();
     
@@ -89,7 +91,7 @@ void loop() {
     }
 //    Serial.println("");
     
-    control1();
+//    control1();
     
     last_time = millis();
   }
