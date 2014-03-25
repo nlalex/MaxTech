@@ -39,9 +39,13 @@ void setup()
     setEqual();
   }
   
-  for(int i=0; i<heaterCount; i++) {
-    pinMode(pHeaters[i], OUTPUT);
-    digitalWrite(pHeaters[i], LOW); 
+  if(CONFIG == 0) {
+    for(int i=0; i<heaterCount; i++) {
+     pinMode(pHeaters[i], OUTPUT);
+      digitalWrite(pHeaters[i], LOW); 
+    }
+  } else if(CONFIG == 1) {
+  
   }
   
   last_time = millis();
