@@ -3,7 +3,7 @@
 
 // Code modified from: Adafruit.com; Peter H Anderson; xbee-arduino library examples
 
-const boolean DEBUG = false;
+const boolean DEBUG = true;
 
 const float lowTemp = 69.0;
 const float highTemp = 72.0;
@@ -22,7 +22,9 @@ Node node4 = Node(addr4, 4); //white
 Node node5 = Node(addr5, 5); //red
 Node node6 = Node(addr6, 6); //blue 
 Node nodes[] = {node2, node3, node4, node5, node6}; //Array containing previously defined Nodes
+Node allNodes[] = {hub, node2, node3, node4, node5, node6};
 int nodeCount = 5; //Number of nodes excluding the hub
+int allNodeCount = nodeCount + 1;
 
 unsigned long last_time; //Used for timing routines
 unsigned long send_time = 5000; //amount of time program sits collecting data before moving on
@@ -35,17 +37,23 @@ void setup()
   Serial1.begin(9600); //For communication to/from XBee with Mega
   xbee.setSerial(Serial1);
   
-  if(digitalRead(pCAL) == HIGH) {
-    setEqual();
+  if(CONFIG == 0) {
+    if(DEBUG) Serial.println("Initializing & turning all heaters off");
+    for(int i=0; i<allNodeCount; i++) {
+      pinMode(pHeaters[i], OUTPUT);
+    }
+    heatersOFF();
+  } else if(CONFIG == 1) {
+    if(DEBUG) Serial.println("Initializing & holding all vent positions");
+    for(int i=0; i<allNodeCount; i++) {
+      pinMode(pVentHigh[i], OUTPUT);
+      pinMode(pVentLow[i], OUTPUT);
+    }
+    ventsHold();
   }
   
-  if(CONFIG == 0) {
-    for(int i=0; i<heaterCount; i++) {
-     pinMode(pHeaters[i], OUTPUT);
-      digitalWrite(pHeaters[i], LOW); 
-    }
-  } else if(CONFIG == 1) {
-  
+  if(digitalRead(pCAL) == HIGH) {
+    setEqual();
   }
   
   last_time = millis();
@@ -165,7 +173,7 @@ void control1() { //control scheme using single reference temperature (hub temp)
       if(CONFIG == 0) { //enCORE setup
         heatersOFF():
       } else if (CONFIG == 1) { //James's setup
-      
+        ventsClose();
       }
       
     } else if(hub.temp < lowTemp) {
@@ -175,7 +183,7 @@ void control1() { //control scheme using single reference temperature (hub temp)
       if(CONFIG == 0) { //enCORE setup
         heatersON();
       } else if (CONFIG == 1) { //James's setup
-      
+        ventsClose();
       }
       
     } else {
@@ -250,13 +258,25 @@ void printCSV() {
 }
 
 void heatersOFF() {
-  for(int i=0; i < heaterCount; i++) {
+  for(int i=0; i < allNodeCount; i++) {
     digitalWrite(pHeaters[i], HIGH); //high turns heaters off
   }
 }
 
 void heatersON() {
-  for(int i=0; i < heaterCount; i++) {
+  for(int i=0; i < allNodeCount; i++) {
     digitalWrite(pHeaters[i], LOW); //low turns heaters on
   }
+}
+
+void ventsHold() {
+
+}
+
+void ventsOpen() {
+
+}
+
+void ventsClose() {
+
 }
