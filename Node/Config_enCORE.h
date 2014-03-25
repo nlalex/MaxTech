@@ -3,7 +3,6 @@ const int CONFIG = 0; //0 for enCORE, 1 for James's
 //Other constants
 const int HUB_NUM = 1;
 const XBeeAddress64 HUB_ADDR = XBeeAddress64(0,0);
-const int heaterCount = 6;
 
 //XBee addresses
 XBeeAddress64 addr2 = XBeeAddress64(0x0013A200,0x40ABB9A8); //black
