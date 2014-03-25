@@ -2,8 +2,6 @@
 #define Node_h
 
 #include <WProgram.h>
-#include <XBee.h>
-#include "Config.h"
 
 class Node {
   public:
@@ -13,10 +11,9 @@ class Node {
     void stashHub(); //gets all data for hub 'node'
     void flush(); //resets all class variables to 0
     void convertTemp(); //converts analog value to temperature in degF
-	void convertTempHub();
+    void convertTempHub();
     void convertHum();
-	void convertHumHub();
-//    void convertMotion(); //allows any motion within reporting window to be recongnized
+    void convertHumHub();
     boolean matchAddress(ZBRxIoSampleResponse packet); //checks for address match
     void printAll(); //prints all variables to console via Serial for testing purposes
     void stashConvert(ZBRxIoSampleResponse packet); //saves & converts data
@@ -24,16 +21,16 @@ class Node {
     void testDatabaseSend(); //formats data as .csv and sends to python script via Serial
     XBeeAddress64 addr; //node address placeholder
     int num; //node number for referencing purposes
-	float tAdjust; //temperature adjustment factor
-	float hAdjust; //humidity adjustment factor
-	float temp;
+    float tAdjust; //temperature adjustment factor
+    float hAdjust; //humidity adjustment factor
+    float temp;
     float hum;
-	boolean trip; //whether or not node has been activated
+    int actuated; //0 or 1 placeholder for energy tracking
+    boolean trip; //whether or not node has been activated
   private:
     int _ldr1;
     int _ldr2;
     int _pir; //temporary motion holder for raw data
-    //int _motion;
 };
 
 #endif
