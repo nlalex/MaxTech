@@ -27,7 +27,14 @@ void Node::stash(ZBRxIoSampleResponse packet) {
   hum = packet.getAnalog(pHUM);
   _ldr1 = packet.getAnalog(pLDR1);
   _ldr2 = packet.getAnalog(pLDR2);
-  _pir = packet.isDigitalOn(pPIR);
+  switch (packet.isDigitalOn(pPIR)) {
+    case 0:
+      _pir = 1;
+      break;
+    case 1:
+      _pir = 0;
+      break;
+  }
   trip = true;
 }
 
@@ -36,7 +43,14 @@ void Node::stashHub() {
   hum = analogRead(pHUMh);
   _ldr1 = analogRead(pLDR1h);
   _ldr2 = analogRead(pLDR2h);
-  _pir = digitalRead(pPIRh);
+  switch (digitalRead(pPIRh)) {
+    case 0:
+      _pir = 1;
+      break;
+    case 1:
+      _pir = 0;
+      break;
+  }
   trip = true;
 }
 
@@ -130,6 +144,9 @@ void Node::printAll() {
   
   Serial.print("Motion: ");
   Serial.println(_pir);
+  
+  Serial.print("Actuated: ");
+  Serial.println(actuated);
   
   Serial.println("");
 }
