@@ -12,19 +12,17 @@ const float highTemp = 72.0;
 XBee xbee = XBee();
 ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
 
+//#include <Config_enCORE.h>
+#include <Config_James.h>
 #include <Node.h>
 Node hub = Node(HUB_ADDR, HUB_NUM); //hub addr: 40ABB77F
-Node node2 = Node(XBeeAddress64(0x0013A200,0x40ABB9A8), 2); //black
-Node node3 = Node(XBeeAddress64(0x0013A200,0x40ABB9DE), 3); //yellow
-Node node4 = Node(XBeeAddress64(0x0013A200,0x40AD57DA), 4); //white
-Node node5 = Node(XBeeAddress64(0x0013A200,0x40ABAE96), 5); //red
-Node node6 = Node(XBeeAddress64(0x0013A200,0x40ABBB6C), 6); //blue 
-
+Node node2 = Node(addr2, 2); //black
+Node node3 = Node(addr3, 3); //yellow
+Node node4 = Node(addr4, 4); //white
+Node node5 = Node(addr5, 5); //red
+Node node6 = Node(addr6, 6); //blue 
 Node nodes[] = {node2, node3, node4, node5, node6}; //Array containing previously defined Nodes
 int nodeCount = 5; //Number of nodes excluding the hub
-
-const int pHeaters[] = {22, 23, 24, 25, 26, 27};
-const int heaterCount = 6;
 
 unsigned long last_time; //Used for timing routines
 unsigned long send_time = 5000; //amount of time program sits collecting data before moving on
@@ -41,57 +39,43 @@ void setup()
     setEqual();
   }
   
-  last_time = millis();
-  
   for(int i=0; i<heaterCount; i++) {
     pinMode(pHeaters[i], OUTPUT);
+    digitalWrite(pHeaters[i], LOW); 
   }
+  
+  last_time = millis();
 }
  
 
 void loop() {
   if(millis()-last_time <= send_time) { //Timed loop functions
-    //attempt to read a packet    
     xbee.readPacket();
     if (xbee.getResponse().isAvailable()) {
-      // got something
       if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
         xbee.getResponse().getZBRxIoSampleResponse(response);
       
         for(int i=0; i < nodeCount; i++) {
           if(nodes[i].matchAddress(response)) {
             nodes[i].stashConvert(response);
-//            Serial.print("Stored data ");
-//            Serial.println(i);
-//            nodes[i].printAll();
-//            nodes[i].flush();
-//            nodes[i].printAll();
-//            Serial.println(nodes[i].temp);
-//            Serial.println(nodes[i].tAdjust);
-//            nodes[i].flush();
-            
-            //nodes[i].flush();
           }
         }
+        
       }
     }
-    //last_time = millis();
   } else {
   
     hub.stashConvertHub();
     
-//    printCSV();
+//    control1();
+    
     hub.printAll();
     hub.flush();
     
     for(int i=0; i < nodeCount; i++) {
-      nodes[i].printAll();
+      if(nodes[i].trip) nodes[i].printAll();
       nodes[i].flush();
-       // Serial.print(nodes[i].trip);
     }
-//    Serial.println("");
-    
-//    control1();
     
     last_time = millis();
   }
@@ -173,15 +157,23 @@ void control1() { //control scheme using single reference temperature (hub temp)
     if(hub.temp > highTemp) {
       //actuate to lower all temps
       if(DEBUG) Serial.println("Temperatures need lowered.");
-      for(int i=0; i < heaterCount; i++) {
-        digitalWrite(pHeaters[i], HIGH); //high turns heaters on
+      
+      if(CONFIG == 0) { //enCORE setup
+        heatersOFF():
+      } else if (CONFIG == 1) { //James's setup
+      
       }
+      
     } else if(hub.temp < lowTemp) {
       //actuate to raise temp
       if(DEBUG) Serial.println("Temperatures need raised.");
-      for(int i=0; i < heaterCount; i++) {
-        digitalWrite(pHeaters[i], LOW); //low turns heaters on
+      
+      if(CONFIG == 0) { //enCORE setup
+        heatersON();
+      } else if (CONFIG == 1) { //James's setup
+      
       }
+      
     } else {
       //do nothing
       if(DEBUG) Serial.println("Temperatures are good.");
@@ -250,5 +242,17 @@ void printCSV() {
   for(int i=0; i<nodeCount; i++) {
     Serial.print(nodes[i].temp);
     Serial.print(",");
+  }
+}
+
+void heatersOFF() {
+  for(int i=0; i < heaterCount; i++) {
+    digitalWrite(pHeaters[i], HIGH); //high turns heaters off
+  }
+}
+
+void heatersON() {
+  for(int i=0; i < heaterCount; i++) {
+    digitalWrite(pHeaters[i], LOW); //low turns heaters on
   }
 }
