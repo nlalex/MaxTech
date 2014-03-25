@@ -3,14 +3,13 @@ const int CONFIG = 1; //0 for enCORE, 1 for James's
 //Other constants
 const int HUB_NUM = 1;
 const XBeeAddress64 HUB_ADDR = XBeeAddress64(0,0);
-const int heaterCount = 6;
 
 //XBee addresses
-XBeeAddress64 addr2 = XBeeAddress64(0x0013A200,0x40ABB9A8); //black
-XBeeAddress64 addr3 = XBeeAddress64(0x0013A200,0x40ABB9DE); //yellow
-XBeeAddress64 addr4 = XBeeAddress64(0x0013A200,0x40AD57DA); //white
-XBeeAddress64 addr5 = XBeeAddress64(0x0013A200,0x40ABAE96); //red
-XBeeAddress64 addr6 = XBeeAddress64(0x0013A200,0x40ABBB6C); //blue
+XBeeAddress64 addr2 = XBeeAddress64(0x0013A200,0x40ABB9A8);
+XBeeAddress64 addr3 = XBeeAddress64(0x0013A200,0x40ABB9DE);
+XBeeAddress64 addr4 = XBeeAddress64(0x0013A200,0x40AD57DA);
+XBeeAddress64 addr5 = XBeeAddress64(0x0013A200,0x40ABAE96);
+XBeeAddress64 addr6 = XBeeAddress64(0x0013A200,0x40ABBB6C);
 
 //XBee pinout
 const int pLDR1 = 0;
@@ -26,6 +25,7 @@ const int pHUMh = 0;
 const int pLDR1h = 2;
 const int pLDR2h = 3;
 const int pCAL = 8; //to be used with setEqual() routine
-const int pHeaters[] = {22, 23, 24, 25, 26, 27};
+const int pVentHigh[] = {};
+const int pVentLow[] = {};
 //analog
 const int pPIRh = 2;
