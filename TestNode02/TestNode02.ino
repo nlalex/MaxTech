@@ -15,12 +15,12 @@ ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
 //#include <Config_enCORE.h>
 #include <Config_James.h>
 #include <Node.h>
-Node hub = Node(HUB_ADDR, HUB_NUM); //hub addr: 40ABB77F
-Node node2 = Node(addr2, 2); //black
-Node node3 = Node(addr3, 3); //yellow
-Node node4 = Node(addr4, 4); //white
-Node node5 = Node(addr5, 5); //red
-Node node6 = Node(addr6, 6); //blue 
+Node hub = Node(HUB_ADDR, HUB_NUM);
+Node node2 = Node(addr2, 2);
+Node node3 = Node(addr3, 3);
+Node node4 = Node(addr4, 4);
+Node node5 = Node(addr5, 5);
+Node node6 = Node(addr6, 6);
 Node nodes[] = {node2, node3, node4, node5, node6}; //Array containing previously defined Nodes
 Node allNodes[] = {hub, node2, node3, node4, node5, node6};
 int nodeCount = 5; //Number of nodes excluding the hub
@@ -29,6 +29,7 @@ int allNodeCount = nodeCount + 1;
 unsigned long last_time; //Used for timing routines
 unsigned long send_time = 5000; //amount of time program sits collecting data before moving on
 unsigned long wait_time = 20000; //maximum wait time for calibration routine
+unsigned long tVentWait = 200; //delay time for vent opening/closing
 
 void setup()
 {
@@ -44,12 +45,12 @@ void setup()
     }
     heatersOFF();
   } else if(CONFIG == 1) {
-    if(DEBUG) Serial.println("Initializing & holding all vent positions");
+    if(DEBUG) Serial.println("Initializing & closing all vents");
     for(int i=0; i<allNodeCount; i++) {
       pinMode(pVentHigh[i], OUTPUT);
       pinMode(pVentLow[i], OUTPUT);
     }
-    ventsHold();
+    ventsClose();
   }
   
   if(digitalRead(pCAL) == HIGH) {
@@ -260,23 +261,40 @@ void printCSV() {
 void heatersOFF() {
   for(int i=0; i < allNodeCount; i++) {
     digitalWrite(pHeaters[i], HIGH); //high turns heaters off
+    allNodes[i].actuate = 0;
   }
 }
 
 void heatersON() {
   for(int i=0; i < allNodeCount; i++) {
     digitalWrite(pHeaters[i], LOW); //low turns heaters on
+    allNodes[i].actuate = 1;
   }
 }
 
 void ventsHold() {
-
+  for(int i=0; i<allNodeCount; i++) {
+    digitalWrite(pVentHigh[i], LOW);
+    digitalWrite(pVentLow[i], LOW) ;
+  }
 }
 
 void ventsOpen() {
-
+  for(int i=0; i<allNodeCount; i++) {
+    digitalWrite(pVentHigh[i], HIGH);
+    digitalWrite(pVentLow[i], LOW) ;
+    allNodes[i].actuate = 1;
+  }
+  delay(tVentWait);
+  ventsHold();
 }
 
 void ventsClose() {
-
+  for(int i=0; i<allNodeCount; i++) {
+    digitalWrite(pVentHigh[i], LOW);
+    digitalWrite(pVentLow[i], HIGH) ;
+    allNodes[i].actuate = 0;
+  }
+  delay(tVentWait);
+  ventsHold();
 }
