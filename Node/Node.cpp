@@ -153,6 +153,24 @@ void Node::printAll() {
   Serial.println("");
 }
 
+void Node::printAllCompact() {
+  Serial.print(num);
+  Serial.print(" : ");
+  Serial.print(trip);
+  Serial.print(" : ");
+  Serial.print(temp);
+  Serial.print(" : ");
+  Serial.print(hum);
+  Serial.print(" : ");
+  Serial.print(_ldr1);
+  Serial.print(" : ");
+  Serial.print(_ldr2);
+  Serial.print(" : ");
+  Serial.print(_pir);
+  Serial.print(" : ");
+  Serial.println(actuated);
+}
+
 void Node::stashConvert(ZBRxIoSampleResponse packet) {
   stash(packet);
   convertTemp();
@@ -179,10 +197,11 @@ void Node::testDatabaseSend() {
   Serial.println(_pir);
 }
 
-void Node::sendToDatabase(WiFiClient client) {
+int Node::sendToDatabase(WiFiClient client) {
 	client.stop();
 
-	if(client.connect(server, 80)) {		
+	if(client.connect(server, 80)) {
+	    if(trip) {
 		client.print("GET /hook1.php?node=");
 		client.print(num);
 		client.print("&temp=");
@@ -202,7 +221,9 @@ void Node::sendToDatabase(WiFiClient client) {
 		client.println("User-Agent: ArduinoWiFi/1.1");
 		client.println("Connection: close");
 		client.println();
-	}
+		return 0;
+	    } else return 1;
+	} else return 2;
 }
 
 
