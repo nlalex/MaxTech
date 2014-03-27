@@ -1,4 +1,4 @@
-// TestNode01
+// TestNode01 -> enCORE setup
 // 02/22/2014
 
 // Code modified from: Adafruit.com; Peter H Anderson; xbee-arduino library examples
@@ -11,15 +11,11 @@ const float highTemp = 72.0;
 #include <SPI.h>
 #include <WiFi.h>
 #include <XBee.h>
-//#include <Config_enCORE.h>
-#include <Config_James.h>
+#include <Config_enCORE.h>
 #include <Node.h>
 
-//#include "XBee.h"
 XBee xbee = XBee();
 ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
-
-//#include "Node.h"
 
 Node hub = Node(HUB_ADDR, HUB_NUM);
 Node node2 = Node(nAddr2, 2);
@@ -35,13 +31,12 @@ int allNodeCount = nodeCount + 1;
 unsigned long last_time; //Used for timing routines
 unsigned long send_time = 5000; //amount of time program sits collecting data before moving on
 unsigned long wait_time = 20000; //maximum wait time for calibration routine
-unsigned long tVentWait = 200; //delay time for vent opening/closing
 
 int status = WL_IDLE_STATUS;
 WiFiClient client;
 
-char ssid[] = "ticklish_chickens";      //  your network SSID (name)
-char pass[] = "esoom@!owl";   // your network password
+char ssid[] = "";      //  your network SSID (name)
+char pass[] = "";   // your network password
 
 void setup()
 {
@@ -50,36 +45,29 @@ void setup()
   Serial1.begin(9600); //For communication to/from XBee with Mega
   xbee.setSerial(Serial1);
   
-//  if(CONFIG == 0) {
-//    if(DEBUG) Serial.println("Initializing & turning all heaters off");
-//    for(int i=0; i<allNodeCount; i++) {
-//      pinMode(pHeaters[i], OUTPUT);
-//    }
-//    heatersOFF();
-//  } else if(CONFIG == 1) {
-//    if(DEBUG) Serial.println("Initializing & closing all vents");
-//    for(int i=0; i<allNodeCount; i++) {
-//      pinMode(pVentHigh[i], OUTPUT);
-//      pinMode(pVentLow[i], OUTPUT);
-//    }
-//    ventsClose();
-//  }
+
+  if(DEBUG) Serial.println("Initializing & turning all heaters off");
+  for(int i=0; i<allNodeCount; i++) {
+    pinMode(pHeaters[i], OUTPUT);
+  }
+  heatersOFF();
+
   
   if(digitalRead(pCAL) == HIGH) {
     setEqual();
   }
   
-//   // attempt to connect to Wifi network:
-//  while ( status != WL_CONNECTED) {
-//    if(DEBUG) Serial.print("Attempting to connect to SSID: ");
-//    if(DEBUG) Serial.println(ssid);
-//    // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
-//    status = WiFi.begin(ssid, pass);
-//
-//    // wait 10 seconds for connection:
-//    delay(10000);
-//  }
-//  if(DEBUG) printWifiStatus();
+  // attempt to connect to Wifi network:
+  while ( status != WL_CONNECTED) {
+    if(DEBUG) Serial.print("Attempting to connect to SSID: ");
+    if(DEBUG) Serial.println(ssid);
+    // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
+    status = WiFi.begin(ssid, pass);
+
+    // wait 10 seconds for connection:
+    delay(10000);
+  }
+  if(DEBUG) printWifiStatus();
   
   last_time = millis();
 }
@@ -89,36 +77,28 @@ void loop() {
   if(millis()-last_time <= send_time) { //Timed loop functions
     xbee.readPacket();
     if (xbee.getResponse().isAvailable()) {
-    Serial.println("Got packet");
-      //if (xbee.getResponse().getApiId() == 145) {
-        xbee.getResponse().setApiId(ZB_IO_SAMPLE_RESPONSE);
-        //Serial.println(xbee.getResponse().getApiId());
-        //xbee.getResponse().getZBRxIoSampleResponse(response);
-        response.setApiId(ZB_IO_SAMPLE_RESPONSE);
-        Serial.println(response.getApiId());
-        xbee.getResponse().getZBRxResponse(response);
+      if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
+        xbee.getResponse().getZBRxIoSampleResponse(response);
         for(int i=0; i < nodeCount; i++) {
           if(nodes[i].matchAddress(response)) {
-            Serial.println("Matched address");
             nodes[i].stashConvert(response);
           } else {
-            Serial.print(response.getRemoteAddress64().getMsb(), HEX);
-            Serial.println(response.getRemoteAddress64().getLsb(), HEX);
+            if(DEBUG) Serial.println("Packet received from unknown source");
           }
         }
         
-      //}
+      }
     }
   } else {  
-//    hub.stashConvertHub();
+    hub.stashConvertHub();
     
-//    control1();
+    control1();
     
-//    hub.printAll();
-//    hub.flush();
+    if(DEBUG) hub.printAll();
+    hub.flush();
     
     for(int i=0; i < nodeCount; i++) {
-      nodes[i].printAll();
+      if(DEBUG) nodes[i].printAll();
       nodes[i].flush();
     }
     
@@ -203,21 +183,13 @@ void control1() { //control scheme using single reference temperature (hub temp)
       //actuate to lower all temps
       if(DEBUG) Serial.println("Temperatures need lowered.");
       
-      if(CONFIG == 0) { //enCORE setup
-        heatersOFF();
-      } else if (CONFIG == 1) { //James's setup
-        ventsClose();
-      }
+      heatersOFF();
       
     } else if(hub.temp < lowTemp) {
       //actuate to raise temp
       if(DEBUG) Serial.println("Temperatures need raised.");
       
-      if(CONFIG == 0) { //enCORE setup
-        heatersON();
-      } else if (CONFIG == 1) { //James's setup
-        ventsClose();
-      }
+      heatersON();
       
     } else {
       //do nothing
@@ -301,45 +273,6 @@ void heatersON() {
   for(int i=0; i < allNodeCount; i++) {
     digitalWrite(pHeaters[i], LOW); //low turns heaters on
     allNodes[i].actuated = 1;
-  }
-}
-
-void ventsHold() {
-  for(int i=0; i<allNodeCount; i++) {
-    digitalWrite(pVentHigh[i], LOW);
-    digitalWrite(pVentLow[i], LOW) ;
-  }
-}
-
-void ventsOpen() {
-  for(int i=0; i<allNodeCount; i++) {
-    digitalWrite(pVentHigh[i], HIGH);
-    digitalWrite(pVentLow[i], LOW) ;
-//    allNodes[i].actuated = 1;
-  }
-  delay(tVentWait);
-  ventsHold();
-}
-
-void ventsClose() {
-  for(int i=0; i<allNodeCount; i++) {
-    digitalWrite(pVentHigh[i], LOW);
-    digitalWrite(pVentLow[i], HIGH) ;
-//    allNodes[i].actuated = 0;
-  }
-  delay(tVentWait);
-  ventsHold();
-}
-
-void readHeater() {
-  if(analogRead(pHEAT) > heatThreshold) {
-    for(int i=0; i<allNodeCount; i++) {
-      allNodes[i].actuated = 1;
-    }
-  } else {
-    for(int i=0; i<allNodeCount; i++) {
-      allNodes[i].actuated = 0;
-    }
   }
 }
 
