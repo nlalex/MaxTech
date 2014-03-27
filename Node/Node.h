@@ -18,10 +18,11 @@ class Node {
     void convertHumHub();
     boolean matchAddress(ZBRxIoSampleResponse packet); //checks for address match
     void printAll(); //prints all variables to console via Serial for testing purposes
+    void printAllCompact();
     void stashConvert(ZBRxIoSampleResponse packet); //saves & converts data
     void stashConvertHub(); //same as above but for hub
     void testDatabaseSend(); //formats data as .csv and sends to python script via Serial
-    void sendToDatabase(WiFiClient client);
+    int sendToDatabase(WiFiClient client);
     XBeeAddress64 addr; //node address placeholder
     int num; //node number for referencing purposes
     float tAdjust; //temperature adjustment factor
