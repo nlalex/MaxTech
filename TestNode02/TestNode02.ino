@@ -82,24 +82,41 @@ void loop() {
         for(int i=0; i < nodeCount; i++) {
           if(nodes[i].matchAddress(response)) {
             nodes[i].stashConvert(response);
-          } else {
-            if(DEBUG) Serial.println("Packet received from unknown source");
           }
         }
-        
-      }
+      } else if(DEBUG) Serial.println("Packet with unknown API ID");
     }
   } else {  
     hub.stashConvertHub();
     
     control1();
     
-    if(DEBUG) hub.printAll();
-    hub.flush();
-    
-    for(int i=0; i < nodeCount; i++) {
-      if(DEBUG) nodes[i].printAll();
-      nodes[i].flush();
+    unsigned long start_send = millis();
+    if(DEBUG) Serial.println("Sending data...");
+    for(int i=0; i < allNodeCount; i++) {
+      if(DEBUG) allNodes[i].printAllCompact();
+      int sendCheck = allNodes[i].sendToDatabase(client);
+      if(DEBUG) {
+        if(sendCheck == 0) {
+          Serial.print(allNodes[i].num);
+          Serial.println(" sent successfully");
+        } else if(sendCheck == 1) {
+          Serial.print(allNodes[i].num);
+          Serial.println(" did not send -> contains null data");
+        } else if(sendCheck == 2) {
+          Serial.print(allNodes[i].num);
+          Serial.println(" did not send -> could not connect");
+        } else {
+          Serial.print(allNodes[i].num);
+          Serial.println(" had unknown error");
+        }
+      }
+      allNodes[i].flush();
+    }
+    if(DEBUG) {
+      Serial.print("All data sent in ")
+      Serial.print((millis()-start_send)/1000.);
+      Serial.println(" seconds")
     }
     
     last_time = millis();
@@ -200,10 +217,7 @@ void control1() { //control scheme using single reference temperature (hub temp)
     if(DEBUG) Serial.println("Hub contains null data.");
   }
   
-  if(DEBUG) {
-    Serial.println("Control checks completed.");
-    Serial.println("");
-  }
+  if(DEBUG) Serial.println("Control checks completed.");
 }
 
 
