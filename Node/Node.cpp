@@ -2,7 +2,7 @@
 #include <WProgram.h>
 #include <XBee.h>
 #include <WiFi.h>
-#include "Config_James.h"
+#include "Config_enCORE.h"
 
 Node::Node(XBeeAddress64 addr_in, int num_in) {
   addr = addr_in;
