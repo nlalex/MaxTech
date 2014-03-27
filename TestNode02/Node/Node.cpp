@@ -1,8 +1,7 @@
 #include "Node.h"
 #include <WProgram.h>
 #include <XBee.h>
-#include <WiFi.h>
-#include "Config_James.h"
+//#include "Config_James.h"
 
 Node::Node(XBeeAddress64 addr_in, int num_in) {
   addr = addr_in;
@@ -177,32 +176,6 @@ void Node::testDatabaseSend() {
   Serial.print(_ldr2);
   Serial.print(',');
   Serial.println(_pir);
-}
-
-void Node::sendToDatabase(WiFiClient client) {
-	client.stop();
-
-	if(client.connect(server, 80)) {		
-		client.print("GET /hook1.php?node=");
-		client.print(num);
-		client.print("&temp=");
-		client.print(temp);
-		client.print("&humidity=");
-		client.print(hum);
-		client.print("&light1=");
-		client.print(_ldr1);
-		client.print("&light2=");
-		client.print(_ldr2);
-		client.print("&motion=");
-		client.print(_pir);
-		client.print("&heat=");
-		client.print(actuated);
-		client.println(" HTTP/1.1");
-		client.println("Host: mesh.org.ohio-state.edu");
-		client.println("User-Agent: ArduinoWiFi/1.1");
-		client.println("Connection: close");
-		client.println();
-	}
 }
 
 
