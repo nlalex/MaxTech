@@ -1,5 +1,5 @@
 #include "Node.h"
-// #include <WProgram.h>
+#include <WProgram.h>
 // #include <XBee.h>
 // #include <WiFi.h>
 // #include "Config_enCORE.h"
@@ -199,10 +199,17 @@ void Node::testDatabaseSend() {
 
 int Node::sendToDatabase(WiFiClient client) {
 	client.stop();
-
-	if(client.connect(server, 80)) {
-	    //if(trip) {
-		client.print("GET /setup1/hook1.php?node=");
+	client.flush();
+	//if(client.connect(server, 80)) {
+	client.connect(server,80);
+	  if(trip) {
+		while(!client.connected()) {
+			client.stop();
+			client.flush();
+			client.connect(server, 80);
+			delay(100);
+		}
+		client.print("GET /hook1.php?node=");
 		client.print(num);
 		client.print("&temp=");
 		client.print(temp);
@@ -217,13 +224,27 @@ int Node::sendToDatabase(WiFiClient client) {
 		client.print("&heat=");
 		client.print(actuated);
 		client.println(" HTTP/1.1");
-		client.println("Host: mesh.org.ohio-state.edu");
+		//client.println("GET /hook1.php?node=1&temp=70&humidity=20.5&light1=500&light2=400&motion=1&heat=1 HTTP/1.1");
+		client.println("Host: www.mesh.org.ohio-state.edu");
 		client.println("User-Agent: ArduinoWiFi/1.1");
 		client.println("Connection: close");
 		client.println();
+
+		client.stop();
 		return 0;
-	    //} else return 1;
-	} else return 2;
+	   } else {
+			//client.stop();
+			return 1;
+		}
+	//} else return 2;
+}
+
+void Node::actuatedON() {
+	actuated = 1;
+}
+
+void Node::actuatedOFF() {
+	actuated = 0;
 }
 
 

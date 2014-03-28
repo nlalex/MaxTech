@@ -24,6 +24,8 @@ class Node {
     void stashConvertHub(); //same as above but for hub
     void testDatabaseSend(); //formats data as .csv and sends to python script via Serial
     int sendToDatabase(WiFiClient client);
+	void actuatedON();
+	void actuatedOFF();
     XBeeAddress64 addr; //node address placeholder
     int num; //node number for referencing purposes
     float tAdjust; //temperature adjustment factor
