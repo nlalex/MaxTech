@@ -4,6 +4,7 @@
 #include <XBee.h>
 #include <WProgram.h>
 #include <WiFi.h>
+#include "Config_enCORE.h"
 
 class Node {
   public:

@@ -1,3 +1,8 @@
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WiFiServer.h>
+#include <WiFiUdp.h>
+
 // TestNode01 -> enCORE setup
 // 02/22/2014
 
@@ -8,21 +13,23 @@ const boolean DEBUG = true;
 const float lowTemp = 69.0;
 const float highTemp = 72.0;
 
+const float hubTempAdjust = 0;
+
 #include <SPI.h>
 #include <WiFi.h>
 #include <XBee.h>
-#include <Config_enCORE.h>
+//#include <Config_enCORE.h>
 #include <Node.h>
 
 XBee xbee = XBee();
 ZBRxIoSampleResponse response = ZBRxIoSampleResponse();
 
 Node hub = Node(HUB_ADDR, HUB_NUM);
-Node node2 = Node(nAddr2, 2);
-Node node3 = Node(nAddr3, 3);
-Node node4 = Node(nAddr4, 4);
-Node node5 = Node(nAddr5, 5);
-Node node6 = Node(nAddr6, 6);
+Node node2 = Node(addr2, 2);
+Node node3 = Node(addr3, 3);
+Node node4 = Node(addr4, 4);
+Node node5 = Node(addr5, 5);
+Node node6 = Node(addr6, 6);
 Node nodes[] = {node2, node3, node4, node5, node6}; //Array containing previously defined Nodes
 Node allNodes[] = {hub, node2, node3, node4, node5, node6};
 int nodeCount = 5; //Number of nodes excluding the hub
@@ -35,8 +42,8 @@ unsigned long wait_time = 20000; //maximum wait time for calibration routine
 int status = WL_IDLE_STATUS;
 WiFiClient client;
 
-char ssid[] = "";      //  your network SSID (name)
-char pass[] = "";   // your network password
+char ssid[] = "enCORE_OSU";      //  your network SSID (name)
+char pass[] = "20solardec11";   // your network password
 
 void setup()
 {
@@ -58,16 +65,16 @@ void setup()
   }
   
   // attempt to connect to Wifi network:
-  while ( status != WL_CONNECTED) {
-    if(DEBUG) Serial.print("Attempting to connect to SSID: ");
-    if(DEBUG) Serial.println(ssid);
-    // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
-    status = WiFi.begin(ssid, pass);
-
-    // wait 10 seconds for connection:
-    delay(10000);
-  }
-  if(DEBUG) printWifiStatus();
+//  while ( status != WL_CONNECTED) {
+//    if(DEBUG) Serial.print("Attempting to connect to SSID: ");
+//    if(DEBUG) Serial.println(ssid);
+//    // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
+//    status = WiFi.begin(ssid, pass);
+//
+//    // wait 10 seconds for connection:
+//    delay(10000);
+//  }
+//  if(DEBUG) printWifiStatus();
   
   last_time = millis();
 }
@@ -77,14 +84,18 @@ void loop() {
   if(millis()-last_time <= send_time) { //Timed loop functions
     xbee.readPacket();
     if (xbee.getResponse().isAvailable()) {
-      if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
+      //if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
         xbee.getResponse().getZBRxIoSampleResponse(response);
+        if(DEBUG) Serial.println(response.getApiId(), HEX);
         for(int i=0; i < nodeCount; i++) {
           if(nodes[i].matchAddress(response)) {
+            if(DEBUG) Serial.println("Matched packet");
             nodes[i].stashConvert(response);
+            Serial.println(nodes[i].temp);
+            Serial.println(nodes[i].trip);
           }
         }
-      } else if(DEBUG) Serial.println("Packet with unknown API ID");
+      //} else if(DEBUG) Serial.println("Packet with unknown API ID");
     }
   } else {  
     hub.stashConvertHub();
@@ -114,9 +125,9 @@ void loop() {
       allNodes[i].flush();
     }
     if(DEBUG) {
-      Serial.print("All data sent in ")
+      Serial.print("All data sent in ");
       Serial.print((millis()-start_send)/1000.);
-      Serial.println(" seconds")
+      Serial.println(" seconds");
     }
     
     last_time = millis();

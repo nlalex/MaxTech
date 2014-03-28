@@ -3,13 +3,14 @@ const int CONFIG = 0; //0 for enCORE, 1 for James's
 //Other constants
 const int HUB_NUM = 1;
 const XBeeAddress64 HUB_ADDR = XBeeAddress64(0,0);
+const char server[] = "mesh.org.ohio-state.edu";
 
 //XBee addresses
-XBeeAddress64 addr2 = XBeeAddress64(0x0013A200,0x40ABB9A8); //black
-XBeeAddress64 addr3 = XBeeAddress64(0x0013A200,0x40ABB9DE); //yellow
-XBeeAddress64 addr4 = XBeeAddress64(0x0013A200,0x40AD57DA); //white
-XBeeAddress64 addr5 = XBeeAddress64(0x0013A200,0x40ABAE96); //red
-XBeeAddress64 addr6 = XBeeAddress64(0x0013A200,0x40ABBB6C); //blue
+const XBeeAddress64 addr2 = XBeeAddress64(0x0013A200,0x40ABB9A8); //black
+const XBeeAddress64 addr3 = XBeeAddress64(0x0013A200,0x40ABB9DE); //yellow
+const XBeeAddress64 addr4 = XBeeAddress64(0x0013A200,0x40AD57DA); //white
+const XBeeAddress64 addr5 = XBeeAddress64(0x0013A200,0x40ABAE96); //red
+const XBeeAddress64 addr6 = XBeeAddress64(0x0013A200,0x40ABBB6C); //blue
 
 //XBee pinout
 const int pLDR1 = 0;

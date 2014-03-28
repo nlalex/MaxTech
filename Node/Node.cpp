@@ -1,8 +1,8 @@
 #include "Node.h"
-#include <WProgram.h>
-#include <XBee.h>
-#include <WiFi.h>
-#include "Config_enCORE.h"
+// #include <WProgram.h>
+// #include <XBee.h>
+// #include <WiFi.h>
+// #include "Config_enCORE.h"
 
 Node::Node(XBeeAddress64 addr_in, int num_in) {
   addr = addr_in;
@@ -201,8 +201,8 @@ int Node::sendToDatabase(WiFiClient client) {
 	client.stop();
 
 	if(client.connect(server, 80)) {
-	    if(trip) {
-		client.print("GET /hook1.php?node=");
+	    //if(trip) {
+		client.print("GET /setup1/hook1.php?node=");
 		client.print(num);
 		client.print("&temp=");
 		client.print(temp);
@@ -222,7 +222,7 @@ int Node::sendToDatabase(WiFiClient client) {
 		client.println("Connection: close");
 		client.println();
 		return 0;
-	    } else return 1;
+	    //} else return 1;
 	} else return 2;
 }
 
