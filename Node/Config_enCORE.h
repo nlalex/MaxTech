@@ -3,7 +3,7 @@ const int CONFIG = 0; //0 for enCORE, 1 for James's
 //Other constants
 const int HUB_NUM = 1;
 const XBeeAddress64 HUB_ADDR = XBeeAddress64(0,0);
-const unsigned long tWaitSend = 10000; //1000 good
+const unsigned long tWaitSend = 1000; //1000 good
 const char server[] = "mesh.org.ohio-state.edu";
 const unsigned long tSendTimeout = 300000;
 

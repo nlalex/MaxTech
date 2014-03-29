@@ -42,9 +42,21 @@ void Node::stash(ZBRxIoSampleResponse packet) {
 
 void Node::stashHub() {
   temp = analogRead(pTEMPh);
+  delay(10);
+  temp = analogRead(pTEMPh);
+  delay(10);
   hum = analogRead(pHUMh);
+  delay(10);
+  hum = analogRead(pHUMh);
+  delay(10);
   _ldr1 = analogRead(pLDR1h);
+  delay(10);
+  _ldr1 = analogRead(pLDR1h);
+  delay(10);
   _ldr2 = analogRead(pLDR2h);
+  delay(10);
+  _ldr2 = analogRead(pLDR2h);
+  delay(10);
   switch (digitalRead(pPIRh)) {
     case 0:
       _pir = 1;

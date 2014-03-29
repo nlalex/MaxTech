@@ -31,7 +31,7 @@ Node nodes[] = {hub, node2, node3, node4, node5, node6}; //Array containing prev
 int nodeCount = 6;
 
 unsigned long last_time; //Used for timing routines
-unsigned long send_time = 30000; //amount of time program sits collecting data before moving on
+unsigned long send_time = 10000; //amount of time program sits collecting data before moving on
 unsigned long wait_time = 20000; //maximum wait time for calibration routine
 
 int status = WL_IDLE_STATUS;
