@@ -203,7 +203,8 @@ int Node::sendToDatabase(WiFiClient client) {
 	//if(client.connect(server, 80)) {
 	client.connect(server,80);
 	  if(trip) {
-		while(!client.connected()) {
+		//long tStart = millis();
+		while(!client.connected()) { // && millis()-tStart<tSendTimeout
 			client.stop();
 			client.flush();
 			client.connect(server, 80);

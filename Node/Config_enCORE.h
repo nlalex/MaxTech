@@ -3,8 +3,9 @@ const int CONFIG = 0; //0 for enCORE, 1 for James's
 //Other constants
 const int HUB_NUM = 1;
 const XBeeAddress64 HUB_ADDR = XBeeAddress64(0,0);
-const unsigned long tWaitSend = 1000; //1000 good
+const unsigned long tWaitSend = 10000; //1000 good
 const char server[] = "mesh.org.ohio-state.edu";
+const unsigned long tSendTimeout = 300000;
 
 //XBee addresses
 const XBeeAddress64 addr2 = XBeeAddress64(0x0013A200,0x40ABB9A8); //black
@@ -27,6 +28,5 @@ const int pHUMh = 0;
 const int pLDR1h = 2;
 const int pLDR2h = 3;
 const int pCAL = 8; //to be used with setEqual() routine
-const int pHeaters[] = {22, 23, 24, 25, 26, 27};
-//analog
+const int pHeaters[] = {22, 23, 30, 24, 25, 26, 28, 27}; //ALL SCREWED UP
 const int pPIRh = 2;

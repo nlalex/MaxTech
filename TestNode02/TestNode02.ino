@@ -31,7 +31,7 @@ Node nodes[] = {hub, node2, node3, node4, node5, node6}; //Array containing prev
 int nodeCount = 6;
 
 unsigned long last_time; //Used for timing routines
-unsigned long send_time = 10000; //amount of time program sits collecting data before moving on
+unsigned long send_time = 30000; //amount of time program sits collecting data before moving on
 unsigned long wait_time = 20000; //maximum wait time for calibration routine
 
 int status = WL_IDLE_STATUS;
@@ -42,14 +42,14 @@ char pass[] = "20solardec11";   // your network password
 
 void setup()
 {
-  Serial.begin(9600); //For communication to/from computer
+  if(DEBUG) Serial.begin(9600); //For communication to/from computer
  
   Serial1.begin(9600); //For communication to/from XBee with Mega
   xbee.setSerial(Serial1);
   
 
   if(DEBUG) Serial.println("Initializing & turning all heaters off");
-  for(int i=0; i<nodeCount; i++) {
+  for(int i=0; i<nodeCount+2; i++) {
     pinMode(pHeaters[i], OUTPUT);
   }
   heatersOFF();
@@ -83,17 +83,27 @@ void loop() {
   } else {  
     nodes[0].stashConvertHub();
     
-    control1();
+    float sumTemp = 0.0;
+    for(int i=1; i<nodeCount; i++) {
+      sumTemp += nodes[i].temp;
+    }
+    float referenceTemp = sumTemp/5;
+    control1(referenceTemp);
+    if(DEBUG) {
+      Serial.print("Reference temperature: ");
+      Serial.println(referenceTemp);
+    }
+    
     
     unsigned long start_send = millis();
     if(DEBUG) Serial.println("Sending data...");
     for(int i=0; i < nodeCount; i++) {
       if(DEBUG) nodes[i].printAllCompact();
 //      connectWifi();
-      while (client.available()) {
-        char c = client.read();
-        Serial.write(c);
-      }
+//      while (client.available()) {
+//        char c = client.read();
+//        Serial.write(c);
+//      }
       
       int sendCheck = nodes[i].sendToDatabase(client);
       if(DEBUG) {
@@ -193,19 +203,19 @@ void setEqual() {
 }
 
 
-void control1() { //control scheme using single reference temperature (hub temp)
+void control1(float referenceTemp) { //control scheme using single reference temperature (hub temp)
   if(DEBUG)  Serial.println("Beginning deadband control checks with single reference...");
   
-  hub.stashConvertHub();
+ // hub.stashConvertHub();
   
-  if(hub.trip) {
-    if(hub.temp > highTemp) {
+  if(nodes[0].trip) {
+    if(referenceTemp > highTemp) {
       //actuate to lower all temps
       if(DEBUG) Serial.println("Temperatures need lowered.");
       
       heatersOFF();
       
-    } else if(hub.temp < lowTemp) {
+    } else if(referenceTemp < lowTemp) {
       //actuate to raise temp
       if(DEBUG) Serial.println("Temperatures need raised.");
       
@@ -281,15 +291,25 @@ void printCSV() {
 
 void heatersOFF() {
   for(int i=0; i < nodeCount; i++) {
-    digitalWrite(pHeaters[i], HIGH); //high turns heaters off
+//    delay(10);
+//    digitalWrite(pHeaters[i], HIGH); //high turns heaters off
     nodes[i].actuatedOFF();
+  }
+  for(int i=0; i < nodeCount+2; i++) {
+    digitalWrite(pHeaters[i], HIGH); //high turns heaters off
+    delay(10);
   }
 }
 
 void heatersON() {
   for(int i=0; i < nodeCount; i++) {
-    digitalWrite(pHeaters[i], LOW); //low turns heaters on
+//    delay(10);
+//    digitalWrite(pHeaters[i], LOW); //low turns heaters on
     nodes[i].actuatedON();
+  }
+  for(int i=0; i < nodeCount+2; i++) {
+    digitalWrite(pHeaters[i], LOW); //low turns heaters on
+    delay(10);
   }
 }
 
