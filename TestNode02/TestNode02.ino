@@ -105,25 +105,56 @@ void loop() {
 //        Serial.write(c);
 //      }
       
-      int sendCheck = nodes[i].sendToDatabase(client);
-      if(DEBUG) {
-        if(sendCheck == 0) {
-          Serial.print(nodes[i].num);
-          Serial.println(" sent successfully");
-        } else if(sendCheck == 1) {
-          Serial.print(nodes[i].num);
-          Serial.println(" did not send -> contains null data");
-        } else if(sendCheck == 2) {
-          Serial.print(nodes[i].num);
-          Serial.println(" did not send -> could not connect");
+      //int sendCheck = nodes[i].sendToDatabase(client);
+      
+      client.flush();
+      client.stop();
+	if(client.connect(server, 80)) {
+                Serial.println("connecting...");
+                client.print("GET /hook1.php?node=");
+                client.print(nodes[i].num);
+                client.print("&temp=");
+                client.print(nodes[i].temp);
+                client.print("&humidity=");
+                client.print(nodes[i].hum);
+                client.print("&light1=");
+                client.print(nodes[i]._ldr1);
+                client.print("&light2=");
+                client.print(nodes[i]._ldr2);
+                client.print("&motion=");
+                client.print(nodes[i]._pir);
+                client.print("&heat=");
+                client.print(nodes[i].actuated);
+                client.println(" HTTP/1.1");
+		client.println("Host: mesh.org.ohio-state.edu");
+		client.println("User-Agent: ArduinoWiFi/1.1");
+		client.println("Connection: close");
+		client.println();
+                Serial.print("Data send to node ");
+                Serial.println(i+1);
+                delay(3000);
         } else {
-          Serial.print(nodes[i].num);
-          Serial.println(" had unknown error");
-        }
-      }
+                Serial.println("connection failed");
+                client.stop();
+        }  
+//      if(DEBUG) {
+//        if(sendCheck == 0) {
+//          Serial.print(nodes[i].num);
+//          Serial.println(" sent successfully");
+//        } else if(sendCheck == 1) {
+//          Serial.print(nodes[i].num);
+//          Serial.println(" did not send -> contains null data");
+//        } else if(sendCheck == 2) {
+//          Serial.print(nodes[i].num);
+//          Serial.println(" did not send -> could not connect");
+//        } else {
+//          Serial.print(nodes[i].num);
+//          Serial.println(" had unknown error");
+//        }
+//      }
       nodes[i].flush();
-      sendCheck = 5;
-      delay(tWaitSend);
+      //sendCheck = 5;
+      //delay(tWaitSend);
     }
 
     if(DEBUG) {
