@@ -41,14 +41,7 @@ void Node::stash(ZBRxIoSampleResponse packet) {
 }
 
 void Node::stashHub() {
-  temp = analogRead(pTEMPh);
-  delay(10);
-  temp = analogRead(pTEMPh);
-  delay(10);
-  hum = analogRead(pHUMh);
-  delay(10);
-  hum = analogRead(pHUMh);
-  delay(10);
+	Serial.println("Reading hub");
   _ldr1 = analogRead(pLDR1h);
   delay(10);
   _ldr1 = analogRead(pLDR1h);
@@ -56,6 +49,14 @@ void Node::stashHub() {
   _ldr2 = analogRead(pLDR2h);
   delay(10);
   _ldr2 = analogRead(pLDR2h);
+  delay(10);
+  temp = analogRead(pTEMPh);
+  delay(10);
+  temp = analogRead(pTEMPh);
+  delay(10);
+  hum = analogRead(pHUMh);
+  delay(10);
+  hum = analogRead(pHUMh);
   delay(10);
   switch (digitalRead(pPIRh)) {
     case 0:
@@ -89,11 +90,11 @@ void Node::convertTemp() {
 
 void Node::convertTempHub() {
   int temp_analog = temp;
-  float voltage = temp_analog * 5.0;
+  float voltage = float(temp_analog) * 5.0;
   voltage /= 1024.0;  
-  float temperatureC = (voltage - 0.5) * 100 ;
+  float temperatureC = (voltage - 0.5) * 100.0 ;
   float temperatureF = ((temperatureC * 9.0) / 5.0) + 32.0;
-  temp = temperatureF + tAdjust;
+  temp = temperatureF;
 }
 
 void Node::convertHum() {

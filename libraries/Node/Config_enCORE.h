@@ -23,10 +23,12 @@ const int pPIR = 4;
 
 //Arduino IO pinout
 //digital
-const int pTEMPh = 1;
+const int pTEMPh = 12;
 const int pHUMh = 0;
 const int pLDR1h = 2;
 const int pLDR2h = 3;
 const int pCAL = 8; //to be used with setEqual() routine
 const int pHeaters[] = {22, 23, 30, 24, 25, 26, 28, 27}; //ALL SCREWED UP
 const int pPIRh = 2;
+
+//const float tAdjusts[] = { , 64.0, ,63.0, 64.0, 64.0};
