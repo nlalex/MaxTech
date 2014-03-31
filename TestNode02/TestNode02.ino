@@ -31,7 +31,7 @@ Node nodes[] = {hub, node2, node3, node4, node5, node6}; //Array containing prev
 int nodeCount = 6;
 
 unsigned long last_time; //Used for timing routines
-unsigned long send_time = 10000; //amount of time program sits collecting data before moving on
+unsigned long send_time = 90000; //amount of time program sits collecting data before moving on
 unsigned long wait_time = 20000; //maximum wait time for calibration routine
 
 int status = WL_IDLE_STATUS;
@@ -42,6 +42,7 @@ char pass[] = "20solardec11";   // your network password
 
 void setup()
 {
+  analogReference(EXTERNAL);
   if(DEBUG) Serial.begin(9600); //For communication to/from computer
  
   Serial1.begin(9600); //For communication to/from XBee with Mega
@@ -76,6 +77,7 @@ void loop() {
         for(int i=0; i < nodeCount; i++) {
           if(nodes[i].matchAddress(response)) {
               nodes[i].stashConvert(response);
+              if(DEBUG) nodes[i].printAllCompact();
             }
         }
       }
@@ -83,11 +85,12 @@ void loop() {
   } else {  
     nodes[0].stashConvertHub();
     
-    float sumTemp = 0.0;
-    for(int i=1; i<nodeCount; i++) {
-      sumTemp += nodes[i].temp;
-    }
-    float referenceTemp = sumTemp/5;
+//    float sumTemp = 0.0;
+//    for(int i=1; i<nodeCount; i++) {
+//      sumTemp += nodes[i].temp;
+//    }
+//    float referenceTemp = sumTemp/5;
+    float referenceTemp = nodes[0].temp;
     control1(referenceTemp);
     if(DEBUG) {
       Serial.print("Reference temperature: ");
@@ -105,7 +108,49 @@ void loop() {
 //        Serial.write(c);
 //      }
       
-      int sendCheck = nodes[i].sendToDatabase(client);
+      //int sendCheck = nodes[i].sendToDatabase(client);
+      
+      int sendCheck = 5;
+      client.flush();
+      client.stop();
+	if(client.connect(server, 80)) {
+          if(nodes[i].trip) {
+//            while(!client.connected()) { // && millis()-tStart<tSendTimeout
+//			client.stop();
+//			client.flush();
+//			client.connect(server, 80);
+//			delay(100);
+//		}
+                //Serial.println("connecting...");
+                client.print("GET /hook1.php?node=");
+                client.print(nodes[i].num);
+                client.print("&temp=");
+                client.print(nodes[i].temp);
+                client.print("&humidity=");
+                client.print(nodes[i].hum);
+                client.print("&light1=");
+                client.print(nodes[i]._ldr1);
+                client.print("&light2=");
+                client.print(nodes[i]._ldr2);
+                client.print("&motion=");
+                client.print(nodes[i]._pir);
+                client.print("&heat=");
+                client.print(nodes[i].actuated);
+                client.println(" HTTP/1.1");
+		client.println("Host: mesh.org.ohio-state.edu");
+		client.println("User-Agent: ArduinoWiFi/1.1");
+		client.println("Connection: close");
+		client.println();
+                //Serial.print("Data send to node ");
+                //Serial.println(i+1);
+                sendCheck = 0;
+                delay(3000);
+          } else sendCheck = 1;
+        } else {
+                //Serial.println("connection failed");
+                client.stop();
+                sendCheck = 2;
+        }  
       if(DEBUG) {
         if(sendCheck == 0) {
           Serial.print(nodes[i].num);
@@ -122,8 +167,8 @@ void loop() {
         }
       }
       nodes[i].flush();
-      sendCheck = 5;
-      delay(tWaitSend);
+      //sendCheck = 5;
+      //delay(tWaitSend);
     }
 
     if(DEBUG) {
@@ -168,6 +213,8 @@ void setEqual() {
       }
     }
   }
+  
+  
   
   if(DEBUG) {
     Serial.print(tripCount);
