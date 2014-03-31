@@ -27,8 +27,8 @@ const int pHUMh = 0;
 const int pLDR1h = 2;
 const int pLDR2h = 3;
 const int pCAL = 8; //to be used with setEqual() routine
-const int pVentHigh[] = {22, 24, 26, 28, 30, 32};
-const int pVentLow[] = {23, 25, 27, 29, 31, 33};
+const int pVentPos[] = {22, 24, 26, 28, 30, 32};
+const int pVentNeg[] = {23, 25, 27, 29, 31, 33};
 const int pHeaters[] = {};
 //analog
 const int pPIRh = 2;
