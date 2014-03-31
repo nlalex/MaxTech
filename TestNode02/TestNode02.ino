@@ -1,4 +1,4 @@
-// TestNode01 -> enCORE setup
+// TestNode01 -> James's setup
 // 02/22/2014
 
 // Code modified from: Adafruit.com; Peter H Anderson; xbee-arduino library examples
@@ -14,7 +14,6 @@ const float hubHumAdjust = 0;
 #include <SPI.h>
 #include <WiFi.h>
 #include <XBee.h>
-//#include <Config_enCORE.h>
 #include <Node.h>
 
 XBee xbee = XBee();
@@ -37,8 +36,8 @@ unsigned long wait_time = 20000; //maximum wait time for calibration routine
 int status = WL_IDLE_STATUS;
 WiFiClient client;
 
-char ssid[] = "enCORE_OSU";      //  your network SSID (name)
-char pass[] = "20solardec11";   // your network password
+char ssid[] = "";      //  your network SSID (name)
+char pass[] = "";   // your network password
 
 void setup()
 {
@@ -49,11 +48,11 @@ void setup()
   xbee.setSerial(Serial1);
   
 
-  if(DEBUG) Serial.println("Initializing & turning all heaters off");
+  if(DEBUG) Serial.println("Initializing & closing all vents");
   for(int i=0; i<nodeCount+2; i++) {
-    pinMode(pHeaters[i], OUTPUT);
+    pinMode(pVentsPos[i], OUTPUT);
   }
-  heatersOFF();
+  //heatersOFF();
 
   
   if(digitalRead(pCAL) == HIGH) {
