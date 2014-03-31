@@ -4,7 +4,7 @@
 #include <XBee.h>
 #include <WProgram.h>
 #include <WiFi.h>
-#include "Config_enCORE.h"
+#include "Config_James.h"
 
 class Node {
   public:
@@ -23,9 +23,9 @@ class Node {
     void stashConvert(ZBRxIoSampleResponse packet); //saves & converts data
     void stashConvertHub(); //same as above but for hub
     void testDatabaseSend(); //formats data as .csv and sends to python script via Serial
-    int sendToDatabase(WiFiClient client);
-	void actuatedON();
-	void actuatedOFF();
+    int sendToDatabase(WiFiClient client);  //NON-WORKING!!!
+    void actuatedON();
+    void actuatedOFF();
     XBeeAddress64 addr; //node address placeholder
     int num; //node number for referencing purposes
     float tAdjust; //temperature adjustment factor
