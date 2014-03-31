@@ -49,8 +49,9 @@ void setup()
   
 
   if(DEBUG) Serial.println("Initializing & closing all vents");
-  for(int i=0; i<nodeCount+2; i++) {
-    pinMode(pVentsPos[i], OUTPUT);
+  for(int i=0; i<nodeCount; i++) { //may need dummy pins defined for padding
+    pinMode(pVentPos[i], OUTPUT);
+    pinMode(pVentNeg[i], OUTPUT);
   }
   //heatersOFF();
 
@@ -259,13 +260,15 @@ void control1(float referenceTemp) { //control scheme using single reference tem
       //actuate to lower all temps
       if(DEBUG) Serial.println("Temperatures need lowered.");
       
-      heatersOFF();
+      //heatersOFF();
+      ventsClose();
       
     } else if(referenceTemp < lowTemp) {
       //actuate to raise temp
       if(DEBUG) Serial.println("Temperatures need raised.");
       
-      heatersON();
+      //heatersON();
+      ventsOpen();
       
     } else {
       //do nothing
@@ -386,4 +389,31 @@ void printWifiStatus() {
   Serial.print("signal strength (RSSI):");
   Serial.print(rssi);
   Serial.println(" dBm");
+}
+
+void ventsHold() {
+  for(int i=0; i<nodeCount; i++) {
+    digitalWrite(pVentPos[i], LOW);
+    digitalWrite(pVentNeg[i], LOW);
+  }
+}
+
+void ventsClose() {
+  for(int i=0; i<nodeCount; i++) {
+    digitalWrite(pVentPos[i], LOW);
+    digitalWrite(pVentNeg[i], HIGH);
+    nodes[i].actuated = 0;
+  }
+  delay(tVentWait);
+  ventsHold();
+}
+
+void ventsOpen() {
+  for(int i=0; i<nodeCount; i++) {
+    digitalWrite(pVentPos[i], HIGH);
+    digitalWrite(pVentNeg[i], LOW);
+    nodes[i].actuated = 1;
+  }
+  delay(tVentsWait);
+  ventsHold();
 }
