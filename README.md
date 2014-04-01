@@ -1,28 +1,28 @@
-MaxTech
+MaxTech - enCORE Setup
 =======
 
-XBee Info
----------
-General
-PAN ID (ID): 55
-Operating Channel (OP): 14
-Baud Rate: 9600
-API Enable (AP): 2
+##How to Use
+* Download zip with button on right
+* Extract folder
+* Open Arduino IDE
+* Within Arduino IDE, set working folder as *.../libraries*
+  * File -> Preferences -> Sketchbook Location
+* Open Arduino sketch within IDE
+  * File -> Open
+* Modify code as needed
+  * Many settings found under *.../libraries/Node/Config_enCORE.h*
+  * Many sub-routines found under *.../libraries/Node/Node.cpp*
+  * *CurrentArduino* sketch needs *SPI*, *WiFi*, *XBee*, and *Node* libraries included (should be by default)
+  
+##File Structure
+* **CurrentArduino** - Main Arduino sketch
 
-Network ID (NI): NET01_COORD
-MAC Address: 0013A20040AD5790
-API Coordinator
-All IO disabled
+* **TestHeaters** - Arduino sketch used for testing heater on/off actuation
 
-Network ID (NI): NET01_N01
-0013A20040ABBB6C
-End Device API
-Config: node01
+* **TestHubTemp** - Arduino sketch used for reading and debugging temperature sensor problems
 
-Network ID (NI): NET01_N02
-MAC Address: 0013A20040ABB9A8
-End Device API
-ADO/DIO0 (DO): ADC
-Config: node01
+* **libraries** - Contains all Arduino support files
+
+* **xctu_config** - XBee configuration files
 
 
