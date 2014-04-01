@@ -1,8 +1,8 @@
 #include "Node.h"
 #include <WProgram.h>
-#include <XBee.h>
-#include <WiFi.h>
-#include "Config_James.h"
+// #include <XBee.h>
+// #include <WiFi.h>
+// #include "Config_enCORE.h"
 
 Node::Node(XBeeAddress64 addr_in, int num_in) {
   addr = addr_in;
@@ -42,9 +42,21 @@ void Node::stash(ZBRxIoSampleResponse packet) {
 
 void Node::stashHub() {
   temp = analogRead(pTEMPh);
+  delay(10);
+  temp = analogRead(pTEMPh);
+  delay(10);
   hum = analogRead(pHUMh);
+  delay(10);
+  hum = analogRead(pHUMh);
+  delay(10);
   _ldr1 = analogRead(pLDR1h);
+  delay(10);
+  _ldr1 = analogRead(pLDR1h);
+  delay(10);
   _ldr2 = analogRead(pLDR2h);
+  delay(10);
+  _ldr2 = analogRead(pLDR2h);
+  delay(10);
   switch (digitalRead(pPIRh)) {
     case 0:
       _pir = 1;
@@ -153,6 +165,24 @@ void Node::printAll() {
   Serial.println("");
 }
 
+void Node::printAllCompact() {
+  Serial.print(num);
+  Serial.print(" : ");
+  Serial.print(trip);
+  Serial.print(" : ");
+  Serial.print(temp);
+  Serial.print(" : ");
+  Serial.print(hum);
+  Serial.print(" : ");
+  Serial.print(_ldr1);
+  Serial.print(" : ");
+  Serial.print(_ldr2);
+  Serial.print(" : ");
+  Serial.print(_pir);
+  Serial.print(" : ");
+  Serial.println(actuated);
+}
+
 void Node::stashConvert(ZBRxIoSampleResponse packet) {
   stash(packet);
   convertTemp();
@@ -179,10 +209,19 @@ void Node::testDatabaseSend() {
   Serial.println(_pir);
 }
 
-void Node::sendToDatabase(WiFiClient client) {
+int Node::sendToDatabase(WiFiClient client) {
 	client.stop();
-
-	if(client.connect(server, 80)) {		
+	client.flush();
+	//if(client.connect(server, 80)) {
+	client.connect(server,80);
+	  if(trip) {
+		//long tStart = millis();
+		while(!client.connected()) { // && millis()-tStart<tSendTimeout
+			client.stop();
+			client.flush();
+			client.connect(server, 80);
+			delay(100);
+		}
 		client.print("GET /hook1.php?node=");
 		client.print(num);
 		client.print("&temp=");
@@ -198,11 +237,27 @@ void Node::sendToDatabase(WiFiClient client) {
 		client.print("&heat=");
 		client.print(actuated);
 		client.println(" HTTP/1.1");
-		client.println("Host: mesh.org.ohio-state.edu");
+		//client.println("GET /hook1.php?node=1&temp=70&humidity=20.5&light1=500&light2=400&motion=1&heat=1 HTTP/1.1");
+		client.println("Host: www.mesh.org.ohio-state.edu");
 		client.println("User-Agent: ArduinoWiFi/1.1");
 		client.println("Connection: close");
 		client.println();
-	}
+
+		client.stop();
+		return 0;
+	   } else {
+			//client.stop();
+			return 1;
+		}
+	//} else return 2;
+}
+
+void Node::actuatedON() {
+	actuated = 1;
+}
+
+void Node::actuatedOFF() {
+	actuated = 0;
 }
 
 
