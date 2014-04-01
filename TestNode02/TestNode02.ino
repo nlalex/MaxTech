@@ -89,25 +89,22 @@ void loop() {
   if(millis()-last_time <= send_time) { //Timed loop functions
     xbee.readPacket();
     if (xbee.getResponse().isAvailable()) {
-    Serial.println("Got packet");
-      //if (xbee.getResponse().getApiId() == 145) {
-        xbee.getResponse().setApiId(ZB_IO_SAMPLE_RESPONSE);
+      if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
+        //xbee.getResponse().setApiId(ZB_IO_SAMPLE_RESPONSE);
         //Serial.println(xbee.getResponse().getApiId());
         //xbee.getResponse().getZBRxIoSampleResponse(response);
-        response.setApiId(ZB_IO_SAMPLE_RESPONSE);
-        Serial.println(response.getApiId());
-        xbee.getResponse().getZBRxResponse(response);
+        //response.setApiId(ZB_IO_SAMPLE_RESPONSE);
+        xbee.getResponse().getZBRxIoSampleResponse(response);
+        Serial.println(response.getApiId(), HEX);
         for(int i=0; i < nodeCount; i++) {
           if(nodes[i].matchAddress(response)) {
             Serial.println("Matched address");
             nodes[i].stashConvert(response);
-          } else {
-            Serial.print(response.getRemoteAddress64().getMsb(), HEX);
-            Serial.println(response.getRemoteAddress64().getLsb(), HEX);
+            Serial.println(nodes[i].temp);
           }
         }
         
-      //}
+      }
     }
   } else {  
 //    hub.stashConvertHub();
