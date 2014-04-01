@@ -1,4 +1,4 @@
-// TestNode01 -> James's setup
+// Current Arduino -> James's setup
 // 02/22/2014
 
 // Code modified from: Adafruit.com; Peter H Anderson; xbee-arduino library examples
