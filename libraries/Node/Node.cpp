@@ -95,24 +95,12 @@ void Node::convertHum() {
 }
 
 void Node::convertHumHub() {
-  // int hum_analog = hum;
-  // float hum_voltage = hum_analog * 1.2/1024.0;
-  // hum_voltage *= 3.2; //constant defined by voltage divider circuit used
-  // hum = (hum_voltage-0.958)/0.0370; //formula taken from datasheet
   float supply_voltage = 5.;
   float hum_voltage = 5.0/1023. * hum *4.;
   float raw_reading = (hum_voltage/supply_voltage -0.16)/0.0062;
   float hum_reading = raw_reading/(1.0546-0.00216*((temp-32.)*5./9.));
   hum = hum_reading + hAdjust;
 }
-
-//void Node::convertMotion() {
-//  if(_pir == 0 && _motion == 0) {
-//    return;
-//  } else {
-//    _motion = 1;
-//  }
-//}
 
 boolean Node::matchAddress(ZBRxIoSampleResponse packet) {
   if(packet.getRemoteAddress64().getLsb()==addr.getLsb() && packet.getRemoteAddress64().getMsb()==addr.getMsb()) {
