@@ -5,10 +5,6 @@
 
 const boolean DEBUG = true; //enable for debugging purposes
 
-//hard-coded temperature thresholds
-const float lowTemp = 71.0;
-const float highTemp = 73.0;
-
 //non-standard library inclusions
 #include <SPI.h>
 #include <WiFi.h>
@@ -41,14 +37,7 @@ WiFiClient client;
 char ssid[] = "enCORE_OSU"; //your network SSID (name)
 char pass[] = "20solardec11"; //your network password
 
-////WiFi settings for recieving time
-//unsigned int localPort = 2390; //local port to listen for UDP packets
-//IPAddress timeServer(129, 6, 15, 28); //time.nist.gov NTP server
-//const int NTP_PACKET_SIZE = 48; //NTP time stamp is in the first 48 bytes of the message
-//byte packetBuffer[ NTP_PACKET_SIZE]; //buffer to hold incoming and outgoing packets
-//WiFiUDP Udp; //a UDP instance to let us send and receive packets over UDP
-float hourDecimal; //variable for current UTC time in decimal hours
-const unsigned long hr = 3600.0; //seconds to hour conversion for convenience
+float hourDecimal; //variable for current time in decimal hours
 
 float settings_high[6] = {73.0,73.0,73.0,73.0,73.0,73.0}; //default high settings at 73
 float settings_low[6] = {71.0,71.0,71.0,71.0,71.0,71.0}; //default low settings at 71
@@ -65,32 +54,16 @@ void setup() {
   for(int i=0; i<nodeCount+2; i++) {
     pinMode(pHeaters[i], OUTPUT);
   }
-  //heatersON();
-  //delay(5000);
   heatersOFF();
-////  heatersON();
-////  delay(10000);
-////  Serial.println("Heater 1");
-////  heatersOFF();
-//  
-//  for(int i=0; i<nodeCount; i++) {
-//    heaterON(i);
-//    delay(2000);
-//    heaterOFF(i);
-//  }
 
   //attempt to connect to Wifi network:
   connectWifi();
   if(DEBUG) printWifiStatus();
-  
+
   getTime();
-  
-  //begin time server connection
-  if(DEBUG) Serial.println("Connecting UDP server...");
-  //Udp.begin(localPort);
 
   if(DEBUG) Serial.println("All setup complete");
-  
+
   //initialize timing
   last_time = millis();
 }
@@ -118,15 +91,13 @@ void loop() {
   else {  //if timeout occurs
 
     nodes[0].stashConvertHub(); //save hub data
-    
+
     getTime();
 
-      schedule1(); //check schedule
-      getSettings(); //get temperature setpoints
-      control3(); //run control actuation
+    schedule1(); //check schedule
+    getSettings(); //get temperature setpoints
+    control3(); //run control actuation
 
-      
-    
     //send data to database
     unsigned long start_send = millis();
     if(DEBUG) Serial.println("Sending data...");
@@ -148,7 +119,7 @@ void loop() {
 //non-zoned control using hub as reference
 void control1() {
   float referenceTemp = nodes[0].temp;
-  
+
   if(DEBUG)  Serial.println("Beginning deadband control checks with single reference...");
 
   if(nodes[0].trip) {
@@ -183,17 +154,17 @@ void control1() {
 void control2() { 
   if(DEBUG)  Serial.println("Beginning deadband control checks with single reference...");
 
-  float referenceCoeffs[] = {.10, .15, .25, .15, .25, .10};
+  float referenceCoeffs[] = {.10, .15, .25, .15, .25, .10  };
   float referenceTemp = 0;
   for(int i=0; i<nodeCount; i++) {
     referenceTemp += referenceCoeffs[i] * nodes[i].temp;
   }
-  
+
   if(DEBUG) {
     Serial.print("Reference temp: ");
     Serial.println(referenceTemp);
   }
-  
+
   if(nodes[0].trip) {
     if(referenceTemp > highTemp) {
       //actuate to lower all temps
@@ -224,60 +195,77 @@ void control2() {
 
 
 void schedule1() {
-/* Simplified family schedule
-Sleep (until 7) -> Master bdrm, child bdrm
-Wake-up/breakfast (7-8) -> bathroom, kitchen, hw
-Morning (8-12) -> living rm, hw
-Lunch (12-1) -> living rm, kitchen
-Afternoon (1-5) -> living rm, hw
-Dinner (5-6) -> living rm, kitchen
-Evening (6-9) -> living rm, hw
-Bedtime (9-10) -> bathroom, hw, master bdrm, child bdrm
-*/
+  /* Simplified family schedule
+   Sleep (until 7) -> Master bdrm, child bdrm
+   Wake-up/breakfast (7-8) -> bathroom, kitchen, hw
+   Morning (8-12) -> living rm, hw
+   Lunch (12-1) -> living rm, kitchen
+   Afternoon (1-5) -> living rm, hw
+   Dinner (5-6) -> living rm, kitchen
+   Evening (6-9) -> living rm, hw
+   Bedtime (9-10) -> bathroom, hw, master bdrm, child bdrm
+   */
   if(DEBUG) Serial.print("Family scheduling check...");
-  
+
   if(hourDecimal < 7.0) {
-    int activeArray[] = {0,0,0,1,1,0};
+    int activeArray[] = {
+      0,0,0,1,1,0    };
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 8.0) {
-    int activeArray[] = {1,0,1,0,0,1};
+  } 
+  else if (hourDecimal < 8.0) {
+    int activeArray[] = {
+      1,0,1,0,0,1    };
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 12.0) {
-    int activeArray[] = {1,1,0,0,0,0};
+  } 
+  else if (hourDecimal < 12.0) {
+    int activeArray[] = {
+      1,1,0,0,0,0    };
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 13.0) {
-    int activeArray[] = {0,1,1,0,0,1};
+  } 
+  else if (hourDecimal < 13.0) {
+    int activeArray[] = {
+      0,1,1,0,0,1    };
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 17.0) {
-    int activeArray[] = {1,1,0,0,0,0};
+  } 
+  else if (hourDecimal < 17.0) {
+    int activeArray[] = {
+      1,1,0,0,0,0    };
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 18.0) {
-    int activeArray[] = {0,1,1,0,0,0};
+  } 
+  else if (hourDecimal < 18.0) {
+    int activeArray[] = {
+      0,1,1,0,0,0    };
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 21.0) {
-    int activeArray[] = {1,1,0,0,0,0};
+  } 
+  else if (hourDecimal < 21.0) {
+    int activeArray[] = {
+      1,1,0,0,0,0    };
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 22.0) {
-    int activeArray[] = {1,0,0,1,1,1};
+  } 
+  else if (hourDecimal < 22.0) {
+    int activeArray[] = {
+      1,0,0,1,1,1    };
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else {
-    int activeArray[] = {0,0,0,1,1,0};
+  } 
+  else {
+    int activeArray[] = {
+      0,0,0,1,1,0    };
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
@@ -298,21 +286,24 @@ void control3() {
           Serial.print(i+1);
           Serial.println(" temperature needs raised");
         }
-      } else if (nodes[i].temp > settings_high[i]) {
+      } 
+      else if (nodes[i].temp > settings_high[i]) {
         heaterOFF(i);
         if(DEBUG) {
           Serial.print("Node ");
           Serial.print(i+1);
           Serial.println(" temperature needs lowered");
         }
-      } else {
+      } 
+      else {
         if(DEBUG) {
           Serial.print("Node ");
           Serial.print(i+1);
           Serial.println(" temperature is good");
         }
       }
-    } else {
+    } 
+    else {
       if(DEBUG) {
         Serial.print("Node ");
         Serial.print(i+1);
@@ -462,7 +453,7 @@ void getSettings() {
   int response_end = 0;
   char c[] = "";
   char buffer[10];
-  
+
   client.flush();
   client.stop();
   if (client.connect(server, 80)) {
@@ -474,10 +465,11 @@ void getSettings() {
     client.println("Connection: close");
     client.println();
     delay(10000);
-  } else {
+  } 
+  else {
     client.stop();
   }
-  
+
   while (client.available()) {     // change 1000 if your query is larger than 1000 characters
     char c = client.read();
     http_response += c;   // We store the response in a string
@@ -514,11 +506,11 @@ void getTime() {
   int response_end = 0;
   char c[] = "";
   char buffer[10];
-  
+
   client.flush();
   client.stop();
   if (client.connect(server, 80)) {
-    if(DEBUG) Serial.println("connecting...");
+    if(DEBUG) Serial.println("Connecting to receive time...");
     // send the HTTP PUT request:
     client.println("GET /time.php?check=true HTTP/1.1"); //needs modified for differing databases
     client.println("Host: mesh.org.ohio-state.edu");
@@ -526,10 +518,11 @@ void getTime() {
     client.println("Connection: close");
     client.println();
     delay(10000);
-  } else {
+  } 
+  else {
     client.stop();
   }
-  
+
   while (client.available()) {     // change 1000 if your query is larger than 1000 characters
     char c = client.read();
     http_response += c;   // We store the response in a string
@@ -542,85 +535,9 @@ void getTime() {
     httpParse[i] = http_response.charAt(i+response_start);
   }
   hourDecimal = (httpParse[0]-48)*10+(httpParse[1]-48);
+//  hourDecimal = ((httpParse[0]-48)*10+(httpParse[1]-48)) + ((httpParse[3]-48)*10+(httpParse[4]-48))/60.0 + ((httpParse[6]-48)*10+(httpParse[7]-48))/3600.0
   if(DEBUG) {
     Serial.print("Time: ");
     Serial.println(hourDecimal);
   }
 }
-//
-////send an NTP request to the time server at the given address
-//unsigned long sendNTPpacket(IPAddress& address) {
-//  //Serial.println("1");
-//  // set all bytes in the buffer to 0
-//  memset(packetBuffer, 0, NTP_PACKET_SIZE);
-//  // Initialize values needed to form NTP request
-//  // (see URL above for details on the packets)
-//  //Serial.println("2");
-//  packetBuffer[0] = 0b11100011;   // LI, Version, Mode
-//  packetBuffer[1] = 0;     // Stratum, or type of clock
-//  packetBuffer[2] = 6;     // Polling Interval
-//  packetBuffer[3] = 0xEC;  // Peer Clock Precision
-//  // 8 bytes of zero for Root Delay & Root Dispersion
-//  packetBuffer[12]  = 49;
-//  packetBuffer[13]  = 0x4E;
-//  packetBuffer[14]  = 49;
-//  packetBuffer[15]  = 52;
-//
-//  //Serial.println("3");
-//
-//  // all NTP fields have been given values, now
-//  // you can send a packet requesting a timestamp:
-//  Udp.beginPacket(address, 123); //NTP requests are to port 123
-//  //Serial.println("4");
-//  Udp.write(packetBuffer, NTP_PACKET_SIZE);
-//  //Serial.println("5");
-//  Udp.endPacket();
-//  //Serial.println("6");
-//}
-//
-////returns UTC time
-//int getTime() {
-//  if(DEBUG) Serial.println("Pinging NIST NTP server...");
-//  sendNTPpacket(timeServer); //send NTP packet to time server
-//  // wait to see if a reply is available
-//  delay(1000);
-//  if(DEBUG) Serial.println( Udp.parsePacket() );
-//  if ( Udp.parsePacket() ) {
-//    if(DEBUG) Serial.println("Packet received");
-//    // We've received a packet, read the data from it
-//    Udp.read(packetBuffer, NTP_PACKET_SIZE); // read the packet into the buffer
-//
-//    //the timestamp starts at byte 40 of the received packet and is four bytes,
-//    // or two words, long. First, esxtract the two words:
-//
-//    unsigned long highWord = word(packetBuffer[40], packetBuffer[41]);
-//    unsigned long lowWord = word(packetBuffer[42], packetBuffer[43]);
-//    // combine the four bytes (two words) into a long integer
-//    // this is NTP time (seconds since Jan 1 1900):
-//    unsigned long secsSince1900 = highWord << 16 | lowWord;
-//
-//    // now convert NTP time into everyday time:
-//    // Unix time starts on Jan 1 1970. In seconds, that's 2208988800:
-//    const unsigned long seventyYears = 2208988800UL;
-//    // subtract seventy years:
-//    unsigned long epoch = secsSince1900 - seventyYears;
-//    // print Unix time:
-//    if(DEBUG) {
-//      Serial.print("Pre-adjusted UNIX time: ");
-//      Serial.println(epoch);
-//    }
-//    epoch -= 3600*4; //correction from UTC to EDT (-4h);
-//    
-//    hourDecimal = ((epoch  % 86400L) / 3600) + ((epoch  % 3600) / 60)/60.0 + (epoch % 60)/3600.0;
-//    
-//    if(DEBUG) {
-//      Serial.print("Current UTC time in hours: ");
-//      Serial.println(hourDecimal);
-//    }
-//    
-//    return 1;
-//  }
-//  else {
-//    return 0;
-//  }
-//}
