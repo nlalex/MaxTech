@@ -124,7 +124,7 @@ void loop() {
 //      Serial.println(referenceTemp);
 //    }
     
-    getSettings();
+//    getSettings();
     unsigned long start_send = millis();
     if(DEBUG) Serial.println("Sending data...");
     for(int i=0; i < nodeCount; i++) {
@@ -410,9 +410,10 @@ void sendData(int i) {
     if(nodes[i].trip) {
         while(!client.connected()) { // && millis()-tStart<tSendTimeout
 			client.stop();
+			if(DEBUG) Serial.println("Problems connecting.  Trying again...");
 			client.flush();
 			client.connect(server, 80);
-			delay(100);
+			delay(1000);
 		}
 
             client.print("GET /hook2.php?node=");
