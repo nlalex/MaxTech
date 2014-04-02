@@ -67,10 +67,17 @@ void setup() {
   }
   //heatersON();
   //delay(5000);
-  //heatersOFF();
-  heaterON(0);
-  Serial.println("Heater 1");
-  heaterOFF(0);
+  heatersOFF();
+////  heatersON();
+////  delay(10000);
+////  Serial.println("Heater 1");
+////  heatersOFF();
+//  
+//  for(int i=0; i<nodeCount; i++) {
+//    heaterON(i);
+//    delay(2000);
+//    heaterOFF(i);
+//  }
 
   //attempt to connect to Wifi network:
   connectWifi();
@@ -112,19 +119,12 @@ void loop() {
 
     nodes[0].stashConvertHub(); //save hub data
     
-//    int timeCheck = getTime();
-    int timeCheck = 0;
-    if(timeCheck == 1) {
+    getTime();
+
       schedule1(); //check schedule
       getSettings(); //get temperature setpoints
       control3(); //run control actuation
-    } else {
-      if(DEBUG) Serial.println("Time not received");
-      hourDecimal = 2; //default to nighttime actuation
-      schedule1();
-      getSettings();
-      control3();
-    }
+
       
     
     //send data to database
@@ -236,42 +236,42 @@ Bedtime (9-10) -> bathroom, hw, master bdrm, child bdrm
 */
   if(DEBUG) Serial.print("Family scheduling check...");
   
-  if(hourDecimal < 7.0*hr) {
+  if(hourDecimal < 7.0) {
     int activeArray[] = {0,0,0,1,1,0};
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 8.0*hr) {
+  } else if (hourDecimal < 8.0) {
     int activeArray[] = {1,0,1,0,0,1};
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 12.0*hr) {
+  } else if (hourDecimal < 12.0) {
     int activeArray[] = {1,1,0,0,0,0};
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 13.0*hr) {
+  } else if (hourDecimal < 13.0) {
     int activeArray[] = {0,1,1,0,0,1};
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 17.0*hr) {
+  } else if (hourDecimal < 17.0) {
     int activeArray[] = {1,1,0,0,0,0};
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 18.0*hr) {
+  } else if (hourDecimal < 18.0) {
     int activeArray[] = {0,1,1,0,0,0};
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 21.0*hr) {
+  } else if (hourDecimal < 21.0) {
     int activeArray[] = {1,1,0,0,0,0};
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } else if (hourDecimal < 22.0*hr) {
+  } else if (hourDecimal < 22.0) {
     int activeArray[] = {1,0,0,1,1,1};
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
@@ -541,7 +541,7 @@ void getTime() {
   for(int i=0; i<(response_end-response_start); i++){
     httpParse[i] = http_response.charAt(i+response_start);
   }
-  hourDecimal = httpParse[0]-48)*10+(httpParse[1]-48);
+  hourDecimal = (httpParse[0]-48)*10+(httpParse[1]-48);
   if(DEBUG) {
     Serial.print("Time: ");
     Serial.println(hourDecimal);
