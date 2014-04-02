@@ -29,13 +29,8 @@ void Node::stash(ZBRxIoSampleResponse packet) {
   hum = packet.getAnalog(pHUM);
   _ldr1 = packet.getAnalog(pLDR1);
   _ldr2 = packet.getAnalog(pLDR2);
-  switch (packet.isDigitalOn(pPIR)) {
-    case 0:
-      _pir = 1;
-      break;
-    case 1:
-      _pir = 0;
-      break;
+  if (!packet.isDigitalOn(pPIR)) {
+    _pir = 1;
   }
   trip = true;
 }
@@ -58,13 +53,8 @@ void Node::stashHub() {
   delay(10);
   hum = analogRead(pHUMh);
   delay(10);
-  switch (digitalRead(pPIRh)) {
-    case 0:
-      _pir = 1;
-      break;
-    case 1:
-      _pir = 0;
-      break;
+  if (digitalRead(pPIRh)==0) {
+    _pir = 1;
   }
   trip = true;
 }
@@ -75,7 +65,6 @@ void Node::flush() {
   _ldr1 = 0;
   _ldr2 = 0;
   _pir = 0;
- // _motion = 0;
  trip = false;
 }
 
@@ -98,10 +87,6 @@ void Node::convertTempHub() {
 }
 
 void Node::convertHum() {
-  // int hum_analog = hum;
-  // float hum_voltage = hum_analog * 1.2/1024.0;
-  // hum_voltage *= 3.2; //constant defined by voltage divider circuit used
-  // hum = (hum_voltage-0.958)/0.0370; //formula taken from datasheet
   float supply_voltage = 5.;
   float hum_voltage = 1.2/1023. * hum *4.;
   float raw_reading = (hum_voltage/supply_voltage -0.16)/0.0062;
