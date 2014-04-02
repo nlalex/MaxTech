@@ -28,8 +28,7 @@ Node node3 = Node(addr3, 3);
 Node node4 = Node(addr4, 4);
 Node node5 = Node(addr5, 5);
 Node node6 = Node(addr6, 6);
-Node nodes[] = {
-  hub, node2, node3, node4, node5, node6}; //Array containing previously defined Nodes
+Node nodes[] = {hub, node2, node3, node4, node5, node6}; //Array containing previously defined Nodes
 //Node nodes[] = {hub, node2, node3, node4, node5, node6};
 int nodeCount = 6;
 
