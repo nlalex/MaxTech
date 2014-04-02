@@ -120,7 +120,7 @@ void Node::convertHumHub() {
   // hum_voltage *= 3.2; //constant defined by voltage divider circuit used
   // hum = (hum_voltage-0.958)/0.0370; //formula taken from datasheet
   float supply_voltage = 5.0;
-  float hum_voltage = 5.0/1023. * hum *4.;
+  float hum_voltage = 3.3/1023. * hum *4.;
   float raw_reading = (hum_voltage/supply_voltage -0.16)/0.0062;
   float hum_reading = raw_reading/(1.0546-0.00216*((temp-32.)*5./9.));
   hum = hum_reading + hAdjust;
