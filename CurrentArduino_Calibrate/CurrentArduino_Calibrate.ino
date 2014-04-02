@@ -65,24 +65,24 @@ void setup() {
   xbee.setSerial(Serial1);
 
   //set all heater pins as outputs & turn all off initially
-  if(DEBUG) Serial.println("Initializing & turning all heaters off");
-  for(int i=0; i<nodeCount+2; i++) {
-    pinMode(pHeaters[i], OUTPUT);
-  }
-  
-  if(DEBUG) {
-    heatersON();
-    for(int i=0; i<nodeCount; i++) {
-      delay(1000);
-      heaterOFF(i);
-    }
-  } else {
-    heatersOFF();
-  }
+//  if(DEBUG) Serial.println("Initializing & turning all heaters off");
+//  for(int i=0; i<nodeCount+2; i++) {
+//    pinMode(pHeaters[i], OUTPUT);
+//  }
+//  
+//  if(DEBUG) {
+//    heatersON();
+//    for(int i=0; i<nodeCount; i++) {
+//      delay(1000);
+//      heaterOFF(i);
+//    }
+//  } else {
+//    heatersOFF();
+//  }
 
   //attempt to connect to Wifi network:
-  connectWifi();
-  if(DEBUG) printWifiStatus();
+//  connectWifi();
+//  if(DEBUG) printWifiStatus();
 
   if(DEBUG) Serial.println("All setup complete");
 
@@ -101,34 +101,41 @@ void loop() {
           if(nodes[i].matchAddress(response)) { //if match is detected
             nodes[i].stashConvert(response); //save data to node
             if(DEBUG) {
-              nodes[i].printAllCompact();
+//              nodes[i].printAllCompact();
               nodes[0].stashConvertHub();
-              nodes[0].printAllCompact();
+//              nodes[0].printAllCompact();
             }
           }
         }
       }
     }
+    if(Serial.available()) {
+      float actualTemp = float(Serial.read());
+      for(int i=0; i<nodeCount; i++) {
+        Serial.println(72.0-nodes[i].temp);
+      }
+      Serial.println(' ');
+    }
   } 
   else {  //if timeout occurs
 
-    nodes[0].stashConvertHub(); //save hub data
-    
-    getSettings(); //get temperature setpoints
-    control1(); //run control actuation
-
-    //send data to database
-    unsigned long start_send = millis();
-    if(DEBUG) Serial.println("Sending data...");
-    for(int i=0; i < nodeCount; i++) {
-      if(DEBUG) nodes[i].printAllCompact();
-      sendData(i); //also flushes data
-    }
-    if(DEBUG) {
-      Serial.print("All data sent in ");
-      Serial.print((millis()-start_send)/1000.);
-      Serial.println(" seconds");
-    }
+//    nodes[0].stashConvertHub(); //save hub data
+//    
+//    getSettings(); //get temperature setpoints
+//    control1(); //run control actuation
+//
+//    //send data to database
+//    unsigned long start_send = millis();
+//    if(DEBUG) Serial.println("Sending data...");
+//    for(int i=0; i < nodeCount; i++) {
+//      if(DEBUG) nodes[i].printAllCompact();
+//      sendData(i); //also flushes data
+//    }
+//    if(DEBUG) {
+//      Serial.print("All data sent in ");
+//      Serial.print((millis()-start_send)/1000.);
+//      Serial.println(" seconds");
+//    }
 
     last_time = millis(); //reset timing for next iteration
   }
@@ -423,11 +430,7 @@ void sendData(int i) {
       client.print("&light2=");
       client.print(nodes[i]._ldr2);
       client.print("&motion=");
-      if(nodes[i].num==4) {
-        client.print(0);
-      } else {
-        client.print(nodes[i]._pir);
-      }
+      client.print(nodes[i]._pir);
       client.print("&heat=");
       client.print(nodes[i].actuated);
       client.print("&active=");

@@ -32,4 +32,4 @@ const int pCAL = 8; //to be used with setEqual() routine
 const int pHeaters[] = {30, 24, 23, 25, 26, 27};
 const int pPIRh = 2;
 
-//const float tAdjusts[] = { , 64.0, ,63.0, 64.0, 64.0};
+const float tAdjusts[] = {-4.00, 2.80, 4.74, 0.70, 3.86, 0.74};

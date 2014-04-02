@@ -424,7 +424,8 @@ void sendData(int i) {
       client.print(nodes[i]._ldr2);
       client.print("&motion=");
       if(nodes[i].num==4) {
-        client.print(0);
+        int zero = 0;
+        client.print(zero);
       } else {
         client.print(nodes[i]._pir);
       }

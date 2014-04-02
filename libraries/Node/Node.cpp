@@ -12,7 +12,7 @@ Node::Node(XBeeAddress64 addr_in, int num_in) {
   _ldr1 = 0;
   _ldr2 = 0;
   _pir = 0;
-  tAdjust = 0;
+  tAdjust = tAdjusts[num_in-1];
   hAdjust = 0;
   trip = false;
  // _motion = 0;
@@ -37,7 +37,6 @@ void Node::stash(ZBRxIoSampleResponse packet) {
 }
 
 void Node::stashHub() {
-	Serial.println("Reading hub");
   _ldr1 = analogRead(pLDR1h);
   delay(10);
   _ldr1 = analogRead(pLDR1h);
@@ -87,7 +86,7 @@ void Node::convertTempHub() {
   voltage /= 1024.0;  
   float temperatureC = (voltage - 0.5) * 100.0 ;
   float temperatureF = ((temperatureC * 9.0) / 5.0) + 32.0;
-  temp = temperatureF;
+  temp = temperatureF + tAdjust;
 }
 
 void Node::convertHum() {
