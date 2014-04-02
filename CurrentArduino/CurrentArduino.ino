@@ -117,75 +117,6 @@ void loop() {
 }
 
 
-
-
-void setEqual() {  
-  if(DEBUG){
-    Serial.println("Beginning calibaration process...");
-  }
-
-  int tripCount = 0;
-
-  last_time = millis();
-
-  while(tripCount != nodeCount && millis() - last_time <= wait_time) { //wait until all nodes are accounted for or times out
-    tripCount = 0;
-    xbee.readPacket();
-    if (xbee.getResponse().isAvailable()) {
-      if (xbee.getResponse().getApiId() == ZB_IO_SAMPLE_RESPONSE) {
-        xbee.getResponse().getZBRxIoSampleResponse(response);
-        for(int i=0; i < nodeCount; i++) {
-          if(nodes[i].matchAddress(response)) {
-            nodes[i].stashConvert(response);
-            if(DEBUG) {
-              Serial.print("Node ");
-              Serial.print(i+2);
-              Serial.println(" responded.");
-            }
-          }
-          tripCount += nodes[i].trip;
-        }
-      }
-    }
-  }
-
-
-
-  if(DEBUG) {
-    Serial.print(tripCount);
-    Serial.print(" of ");
-    Serial.print(nodeCount);
-    Serial.println(" nodes accounted for.");
-  }
-
-  if(tripCount == nodeCount) {
-    hub.stashConvertHub();
-
-    if(DEBUG) {
-      Serial.println("Calibration completed.");
-      Serial.println("Reference values (node, temperature adjustment, humidity adjustment)");
-    }
-
-    for(int i=0; i < nodeCount; i++) {
-      nodes[i].tAdjust = hub.temp - nodes[i].temp;
-      nodes[i].hAdjust = hub.hum - nodes[i].hum;
-
-      if(DEBUG) {
-        Serial.print("Node ");
-        Serial.print(i+2);
-        Serial.print(": ");
-        Serial.print(nodes[i].tAdjust);
-        Serial.print(", ");
-        Serial.println(nodes[i].hAdjust);
-      }
-    }
-  } 
-  else { //if not all nodes accounted for
-    if(DEBUG) Serial.println("Calibration unsuccessful");
-  }
-}
-
-
 void control1(float referenceTemp) { //control scheme using single reference temperature (hub temp)
   if(DEBUG)  Serial.println("Beginning deadband control checks with single reference...");
 
@@ -455,52 +386,52 @@ void sendData(int i) {
   //delay(tWaitSend);
 }
 
-void getSettings() {
-  String http_response = "";
-  int response_start = 0;
-  int response_end = 0;
-  char c[] = "";
-  char buffer[10];
-
-  if (client.connect(server, 80)) {
-    Serial.println("connecting...");
-    // send the HTTP PUT request:
-    client.println("GET /settings2.php?checksettingsa=true HTTP/1.1");
-    client.println("Host: mesh.org.ohio-state.edu");
-    client.println("User-Agent: ArduinoWiFi/1.1");
-    client.println("Connection: close");
-    client.println();
-    delay(10000);
-  }
-  while (client.available()) {     // change 1000 if your query is larger than 1000 characters
-    char c = client.read();
-    http_response += c;   // We store the response in a string
-  }
-  response_start = http_response.indexOf("<data>")+6; 
-  response_end = http_response.indexOf("</data>");
-
-  char httpParse[response_end-response_start];
-  for(int i=0; i<(response_end-response_start); i++){
-    httpParse[i] = http_response.charAt(i+response_start);
-  }
-
-  for(int i=0; i<6; i++){
-    settings_high[i] = (httpParse[3+9*i]-48)*10+(httpParse[4+9*i]-48); 
-  }    
-
-  for(int i=0; i<6; i++){
-    settings_low[i] = (httpParse[6+9*i]-48)*10+(httpParse[7+9*i]-48); 
-  }  
-
-  if(DEBUG) {
-    Serial.println("Low/high temp settings: ");
-    for(int i=0; i<nodeCount; i++) {
-      Serial.print(settings_low[i]);
-      Serial.print("/");
-      Serial.println(settings_high[i]);
-    }
-  }
-}
+//void getSettings() {
+//  String http_response = "";
+//  int response_start = 0;
+//  int response_end = 0;
+//  char c[] = "";
+//  char buffer[10];
+//
+//  if (client.connect(server, 80)) {
+//    Serial.println("connecting...");
+//    // send the HTTP PUT request:
+//    client.println("GET /settings2.php?checksettingsa=true HTTP/1.1");
+//    client.println("Host: mesh.org.ohio-state.edu");
+//    client.println("User-Agent: ArduinoWiFi/1.1");
+//    client.println("Connection: close");
+//    client.println();
+//    delay(10000);
+//  }
+//  while (client.available()) {     // change 1000 if your query is larger than 1000 characters
+//    char c = client.read();
+//    http_response += c;   // We store the response in a string
+//  }
+//  response_start = http_response.indexOf("<data>")+6; 
+//  response_end = http_response.indexOf("</data>");
+//
+//  char httpParse[response_end-response_start];
+//  for(int i=0; i<(response_end-response_start); i++){
+//    httpParse[i] = http_response.charAt(i+response_start);
+//  }
+//
+//  for(int i=0; i<6; i++){
+//    settings_high[i] = (httpParse[3+9*i]-48)*10+(httpParse[4+9*i]-48); 
+//  }    
+//
+//  for(int i=0; i<6; i++){
+//    settings_low[i] = (httpParse[6+9*i]-48)*10+(httpParse[7+9*i]-48); 
+//  }  
+//
+//  if(DEBUG) {
+//    Serial.println("Low/high temp settings: ");
+//    for(int i=0; i<nodeCount; i++) {
+//      Serial.print(settings_low[i]);
+//      Serial.print("/");
+//      Serial.println(settings_high[i]);
+//    }
+//  }
+//}
 
 
 
