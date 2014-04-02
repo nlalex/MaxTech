@@ -3,7 +3,7 @@ const int CONFIG = 1; //0 for enCORE, 1 for James's
 //Other constants
 const int HUB_NUM = 1;
 const XBeeAddress64 HUB_ADDR = XBeeAddress64(0,0);
-const int ctThreshold = 100;
+const int threshCT = 100;
 const unsigned long tVentWait = 500;
 const unsigned long tWaitSend = 50; //SHOULD NOT NEED
 const char server[] = "mesh.org.ohio-state.edu";
@@ -24,7 +24,7 @@ const int pPIR = 4;
 
 //Arduino IO pinout
 //analog
-const int pTEMPh = 12;
+const int pTEMPh = 15;
 const int pHUMh = 0;
 const int pLDR1h = 2;
 const int pLDR2h = 3;

@@ -1,10 +1,10 @@
 void setup() {
   Serial.begin(9600);
-  analogReference(EXTERNAL);
+  //analogReference(EXTERNAL);
 }
 
 void loop() {
-  int temp_analog = analogRead(12);
+  int temp_analog = analogRead(15);
   float voltage = temp_analog * 5000.;
   voltage /= 1024.0;  
   float temperatureC = (voltage - 500.0)/ 10.0 ;

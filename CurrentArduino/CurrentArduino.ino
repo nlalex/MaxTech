@@ -60,9 +60,9 @@ void setup()
     pinMode(pVentEnable[i], OUTPUT);
   }
   //heatersOFF();
-  ventsOpen();
-  delay(1000);
-  ventsClose();
+//  ventsOpen();
+//  delay(1000);
+//  ventsClose();
 
   
   if(digitalRead(pCAL) == HIGH) {
@@ -117,14 +117,14 @@ void loop() {
 //      sumTemp += nodes[i].temp;
 //    }
 //    float referenceTemp = sumTemp/5;
-    float referenceTemp = nodes[0].temp;
-    control1(referenceTemp);
-    if(DEBUG) {
-      Serial.print("Reference temperature: ");
-      Serial.println(referenceTemp);
-    }
+//    float referenceTemp = nodes[0].temp;
+//    control1(referenceTemp);
+//    if(DEBUG) {
+//      Serial.print("Reference temperature: ");
+//      Serial.println(referenceTemp);
+//    }
     
-    
+    getSettings();
     unsigned long start_send = millis();
     if(DEBUG) Serial.println("Sending data...");
     for(int i=0; i < nodeCount; i++) {
@@ -476,7 +476,7 @@ void getSettings() {
   if (client.connect(server, 80)) {
     Serial.println("connecting...");
     // send the HTTP PUT request:
-    client.println("GET /settings1.php?checksettingsa=true HTTP/1.1");
+    client.println("GET /settings2.php?checksettingsa=true HTTP/1.1");
     client.println("Host: mesh.org.ohio-state.edu");
     client.println("User-Agent: ArduinoWiFi/1.1");
     client.println("Connection: close");
