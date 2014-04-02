@@ -33,7 +33,3 @@ const int pHeaters[] = {30, 24, 23, 25, 26, 27};
 const int pPIRh = 2;
 
 //const float tAdjusts[] = { , 64.0, ,63.0, 64.0, 64.0};
-
-//inclusions for backwards-compatability
-const float highTemp = 73.0;
-const float lowTemp = 71.0;

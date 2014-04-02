@@ -41,6 +41,8 @@ float hourDecimal; //variable for current time in decimal hours
 
 float settings_high[6] = {73.0,73.0,73.0,73.0,73.0,73.0}; //default high settings at 73
 float settings_low[6] = {71.0,71.0,71.0,71.0,71.0,71.0}; //default low settings at 71
+float highTemp = 73.0;
+float lowTemp = 71.0;
 
 String http_response = "";
 int response_start = 0;
@@ -82,8 +84,6 @@ void setup() {
   connectWifi();
   if(DEBUG) printWifiStatus();
 
-  getTime();
-
   if(DEBUG) Serial.println("All setup complete");
 
   //initialize timing
@@ -102,8 +102,8 @@ void loop() {
             nodes[i].stashConvert(response); //save data to node
             if(DEBUG) {
               nodes[i].printAllCompact();
-              //nodes[0].stashConvertHub();
-              //nodes[0].printAllCompact();
+//              nodes[0].stashConvertHub();
+//              nodes[0].printAllCompact();
             }
           }
         }
@@ -113,12 +113,9 @@ void loop() {
   else {  //if timeout occurs
 
     nodes[0].stashConvertHub(); //save hub data
-
-    getTime();
-
-    schedule1(); //check schedule
+    
     getSettings(); //get temperature setpoints
-    control3(); //run control actuation
+    control1(); //run control actuation
 
     //send data to database
     unsigned long start_send = millis();
@@ -141,6 +138,8 @@ void loop() {
 //non-zoned control using hub as reference
 void control1() {
   float referenceTemp = nodes[0].temp;
+  highTemp = settings_high[0];
+  lowTemp = settings_low[0];
 
   if(DEBUG)  Serial.println("Beginning deadband control checks with single reference...");
 
