@@ -54,7 +54,16 @@ void setup() {
   for(int i=0; i<nodeCount+2; i++) {
     pinMode(pHeaters[i], OUTPUT);
   }
-  heatersOFF();
+  
+  if(DEBUG) {
+    heatersON();
+    for(int i=0; i<nodeCount; i++) {
+      delay(1000);
+      heaterOFF(i);
+    }
+  } else {
+    heatersOFF();
+  }
 
   //attempt to connect to Wifi network:
   connectWifi();
@@ -315,7 +324,7 @@ void control3() {
 }
 
 void heaterOFF(int p) {
-  nodes[p].isActuated(1);
+  nodes[p].isActuated(0);
   digitalWrite(pHeaters[p], HIGH); //high turns heaters off
   if(DEBUG) {
     Serial.print("Heater ");
@@ -404,6 +413,8 @@ void sendData(int i) {
       client.print(nodes[i]._pir);
       client.print("&heat=");
       client.print(nodes[i].actuated);
+      client.print("&active=");
+      client.print(nodes[i].active);
       //            client.print("&crt=");
       //            client.print(nodes[i].ct);
       client.println(" HTTP/1.1");
@@ -534,8 +545,8 @@ void getTime() {
   for(int i=0; i<(response_end-response_start); i++){
     httpParse[i] = http_response.charAt(i+response_start);
   }
-  hourDecimal = (httpParse[0]-48)*10+(httpParse[1]-48);
-//  hourDecimal = ((httpParse[0]-48)*10+(httpParse[1]-48)) + ((httpParse[3]-48)*10+(httpParse[4]-48))/60.0 + ((httpParse[6]-48)*10+(httpParse[7]-48))/3600.0
+//  hourDecimal = (httpParse[0]-48)*10+(httpParse[1]-48);
+  hourDecimal = ((httpParse[0]-48)*10+(httpParse[1]-48)) + ((httpParse[3]-48)*10+(httpParse[4]-48))/60.0 + ((httpParse[6]-48)*10+(httpParse[7]-48))/3600.0;
   if(DEBUG) {
     Serial.print("Time: ");
     Serial.println(hourDecimal);

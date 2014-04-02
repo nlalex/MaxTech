@@ -60,6 +60,7 @@ void Node::stashHub() {
   delay(10);
   //_pir = analogRead(pPIRh);
   trip = true;
+
 }
 
 void Node::flush() {
