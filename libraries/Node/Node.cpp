@@ -159,7 +159,7 @@ void Node::printAllCompact() {
   Serial.print(" : ");
   Serial.print(_pir);
   Serial.print(" : ");
-  Serial.print(actuated);
+  Serial.println(actuated);
 }
 
 void Node::stashConvert(ZBRxIoSampleResponse packet) {
