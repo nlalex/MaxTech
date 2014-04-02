@@ -45,6 +45,18 @@ float settings_low[6] = {71.0,71.0,71.0,71.0,71.0,71.0}; //default low settings 
 boolean vOpen = false;
 int heat = 0;
 
+String http_response = "";
+int response_start = 0;
+int response_end = 0;
+char c[] = "";
+char buffer[10];
+
+String http_response1 = "";
+int response_start1 = 0;
+int response_end1 = 0;
+char c1[] = "";
+char buffer1[10];
+
 void setup()
 {
   analogReference(EXTERNAL); //3.3V analog reference is used to help with temperature readings
@@ -230,13 +242,13 @@ void sendData(int i) {
   client.stop();
   if(client.connect(server, 80)) {
     if(nodes[i].trip) {
-      while(!client.connected()) { // && millis()-tStart<tSendTimeout
-        client.stop();
-        if(DEBUG) Serial.println("Problems connecting.  Trying again...");
-        client.flush();
-        client.connect(server, 80);
-        delay(1000);
-      }
+//      while(!client.connected()) { // && millis()-tStart<tSendTimeout
+//        client.stop();
+//        if(DEBUG) Serial.println("Problems connecting.  Trying again...");
+//        client.flush();
+//        client.connect(server, 80);
+//        delay(1000);
+//      }
 
       client.print("GET /hook2.php?node=");
       client.print(nodes[i].num);
@@ -302,12 +314,6 @@ void sendData(int i) {
 
 //gets temperature setpoints from website
 void getSettings() {
-  String http_response = "";
-  int response_start = 0;
-  int response_end = 0;
-  char c[] = "";
-  char buffer[10];
-
   client.flush();
   client.stop();
   if (client.connect(server, 80)) {
@@ -319,9 +325,15 @@ void getSettings() {
     client.println("Connection: close");
     client.println();
     delay(10000);
+    http_response = "";
+    response_start = 0;
+    response_end = 0;
+    char c[] = "";
   } 
   else {
     client.stop();
+    if(DEBUG) Serial.println("Settings could not be gotten");
+    return;
   }
 
   while (client.available()) {     // change 1000 if your query is larger than 1000 characters
@@ -355,12 +367,6 @@ void getSettings() {
 }
 
 void getTime() {
-  String http_response = "";
-  int response_start = 0;
-  int response_end = 0;
-  char c[] = "";
-  char buffer[10];
-
   client.flush();
   client.stop();
   if (client.connect(server, 80)) {
@@ -372,24 +378,30 @@ void getTime() {
     client.println("Connection: close");
     client.println();
     delay(10000);
+    http_response1 = "";
+    response_start1 = 0;
+    response_end1 = 0;
+    char c1[] = "";
   } 
   else {
     client.stop();
+    if(DEBUG) Serial.println("Could not get time");
+    return;
   }
 
   while (client.available()) {     // change 1000 if your query is larger than 1000 characters
     char c = client.read();
-    http_response += c;   // We store the response in a string
+    http_response1 += c;   // We store the response in a string
   }
-  response_start = http_response.indexOf("<data>")+6; 
-  response_end = http_response.indexOf("</data>");
+  response_start1 = http_response1.indexOf("<data>")+6; 
+  response_end1 = http_response1.indexOf("</data>");
 
-  char httpParse[response_end-response_start];
-  for(int i=0; i<(response_end-response_start); i++){
-    httpParse[i] = http_response.charAt(i+response_start);
+  char httpParse1[response_end1-response_start1];
+  for(int i=0; i<(response_end1-response_start1); i++){
+    httpParse1[i] = http_response1.charAt(i+response_start1);
   }
 //  hourDecimal = (httpParse[0]-48)*10+(httpParse[1]-48);
-  hourDecimal = ((httpParse[0]-48)*10+(httpParse[1]-48)) + ((httpParse[3]-48)*10+(httpParse[4]-48))/60.0 + ((httpParse[6]-48)*10+(httpParse[7]-48))/3600.0;
+  hourDecimal = ((httpParse1[0]-48)*10+(httpParse1[1]-48)) + ((httpParse1[3]-48)*10+(httpParse1[4]-48))/60.0 + ((httpParse1[6]-48)*10+(httpParse1[7]-48))/3600.0;
   if(DEBUG) {
     Serial.print("Time: ");
     Serial.println(hourDecimal);
