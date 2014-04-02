@@ -17,7 +17,7 @@ Node::Node(XBeeAddress64 addr_in, int num_in) {
     pinMode(pPIRh, INPUT);
   }
   actuated = 3;
-  ct = 0;
+  // ct = 0;
   active = 0;
 }
 
@@ -67,11 +67,11 @@ void Node::stashHub() {
       break;
   }
   trip = true;
-  if(analogRead(pCT)>threshCT) {
-	ct = 1;
-   }else {
-	ct = 0;
-	}
+  // if(analogRead(pCT)>threshCT) {
+	// ct = 1;
+   // }else {
+	// ct = 0;
+	// }
 }
 
 void Node::flush() {
@@ -119,7 +119,7 @@ void Node::convertHumHub() {
   // float hum_voltage = hum_analog * 1.2/1024.0;
   // hum_voltage *= 3.2; //constant defined by voltage divider circuit used
   // hum = (hum_voltage-0.958)/0.0370; //formula taken from datasheet
-  float supply_voltage = 3.3;
+  float supply_voltage = 5.0;
   float hum_voltage = 5.0/1023. * hum *4.;
   float raw_reading = (hum_voltage/supply_voltage -0.16)/0.0062;
   float hum_reading = raw_reading/(1.0546-0.00216*((temp-32.)*5./9.));
@@ -186,9 +186,11 @@ void Node::printAllCompact() {
   Serial.print(" : ");
   Serial.print(_pir);
   Serial.print(" : ");
-  Serial.print(actuated);
+  Serial.print(active);
   Serial.print(" : ");
-  Serial.println(ct);
+  Serial.println(actuated);
+  // Serial.print(" : ");
+  // Serial.println(ct);
 }
 
 void Node::stashConvert(ZBRxIoSampleResponse packet) {

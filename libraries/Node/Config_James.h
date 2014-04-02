@@ -33,6 +33,7 @@ const int pCT = 4;
 
 //digital
 const int pPIRh = 2;
+const int pHEAT = 53;
 
 //1a=main_hallway=blue, 1b=front_bath=brown, 2=front_bed=orange, 3=office=green
 const int pVentPos[] = {22, 24, 28, 26, 30, 32}; //solid colors

@@ -43,6 +43,7 @@ float settings_high[6] = {73.0,73.0,73.0,73.0,73.0,73.0}; //default high setting
 float settings_low[6] = {71.0,71.0,71.0,71.0,71.0,71.0}; //default low settings at 71
 
 boolean vOpen = false;
+int heat = 0;
 
 void setup()
 {
@@ -52,6 +53,8 @@ void setup()
   Serial1.begin(9600); //For communication to/from XBee with Mega
   xbee.setSerial(Serial1);
 
+  if(DEBUG) Serial.println("Initializing & turning heater off");
+  pinMode(pHEAT, OUTPUT);
   if(DEBUG) Serial.println("Initializing & closing all vents");
   for(int i=0; i<nodeCount; i++) { //may need dummy pins defined for padding
     pinMode(pVentPos[i], OUTPUT);
@@ -93,8 +96,8 @@ void loop() {
             nodes[i].stashConvert(response); 
             if(DEBUG) {
               nodes[i].printAllCompact();
-              //              nodes[0].stashConvertHub();
-              //              nodes[0].printAllCompact();
+              nodes[0].stashConvertHub();
+              nodes[0].printAllCompact();
             }
           }
         }
@@ -105,9 +108,9 @@ void loop() {
     nodes[0].stashConvertHub();
 
     getTime();
-    schedule1();
+    float override = schedule2();
     getSettings();
-    control1();
+    control1(override);
     
     //send data to database
     unsigned long start_send = millis();
@@ -250,7 +253,7 @@ void sendData(int i) {
       client.print("&heat=");
       client.print(nodes[i].actuated);
       client.print("&crt=");
-      client.print(nodes[i].ct);
+      client.print(heat);
       client.print("&active=");
       client.print(nodes[i].active);
       client.print("&settinghigh=");
@@ -393,125 +396,98 @@ void getTime() {
   }
 }
 
-void schedule1() {
+float schedule2() {
   /* Simplified family schedule
-   Sleep (until 7) -> Master bdrm, child bdrm
-   Wake-up/breakfast (7-8) -> bathroom, kitchen, hw
-   Morning (8-12) -> living rm, hw
-   Lunch (12-1) -> living rm, kitchen
-   Afternoon (1-5) -> living rm, hw
-   Dinner (5-6) -> living rm, kitchen
-   Evening (6-9) -> living rm, hw
-   Bedtime (9-10) -> bathroom, hw, master bdrm, child bdrm
+   Sleep (until 9) -> Master bdrm, living, kitchen, hallway
+   Work (9-4) -> All open, low setpoint of 65
+   Evening (4-12) -> Master bdrm, living, kitchen, office, hallway
    */
-  if(DEBUG) Serial.print("Family scheduling check...");
+  if(DEBUG) Serial.print("James scheduling check...");
 
-  if(hourDecimal < 7.0) {
-    int activeArray[] = {
-      0,0,0,1,1,0    };
+  if(hourDecimal < 9.0) {
+    int activeArray[] = {1,0,0,1,1,1};
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
-  } 
-  else if (hourDecimal < 8.0) {
-    int activeArray[] = {
-      1,0,1,0,0,1    };
+  } else if(hourDecimal < 16.0) {
+    int activeArray[] = {1,1,1,1,1,1};
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
+      if(DEBUG) Serial.println("Complete - Reference Point Override");
+      return 65.0;
     }
-  } 
-  else if (hourDecimal < 12.0) {
-    int activeArray[] = {
-      1,1,0,0,0,0    };
-    for(int i=0; i<nodeCount; i++) {
-      nodes[i].isActive(activeArray[i]);
-    }
-  } 
-  else if (hourDecimal < 13.0) {
-    int activeArray[] = {
-      0,1,1,0,0,1    };
-    for(int i=0; i<nodeCount; i++) {
-      nodes[i].isActive(activeArray[i]);
-    }
-  } 
-  else if (hourDecimal < 17.0) {
-    int activeArray[] = {
-      1,1,0,0,0,0    };
-    for(int i=0; i<nodeCount; i++) {
-      nodes[i].isActive(activeArray[i]);
-    }
-  } 
-  else if (hourDecimal < 18.0) {
-    int activeArray[] = {
-      0,1,1,0,0,0    };
-    for(int i=0; i<nodeCount; i++) {
-      nodes[i].isActive(activeArray[i]);
-    }
-  } 
-  else if (hourDecimal < 21.0) {
-    int activeArray[] = {
-      1,1,0,0,0,0    };
-    for(int i=0; i<nodeCount; i++) {
-      nodes[i].isActive(activeArray[i]);
-    }
-  } 
-  else if (hourDecimal < 22.0) {
-    int activeArray[] = {
-      1,0,0,1,1,1    };
-    for(int i=0; i<nodeCount; i++) {
-      nodes[i].isActive(activeArray[i]);
-    }
-  } 
-  else {
-    int activeArray[] = {
-      0,0,0,1,1,0    };
+  } else {
+    int activeArray[] = {1,0,1,1,1,1};
     for(int i=0; i<nodeCount; i++) {
       nodes[i].isActive(activeArray[i]);
     }
   }
+  
   if(DEBUG) Serial.println("Complete");
+  return 0.0;
 }
 
 
 //zoned control scheme using variable setpoints and hardcoded schedule
-void control1() { 
+void control1(float override) { 
   if(DEBUG)  Serial.println("Deadband control checks with individual references...");
-
+  
+  int n=0;
+  float refLOW = 0.0;
+  float refHIGH = 0.0;
+  float refTEMP = 0.0;
   for(int i=0; i<nodeCount; i++) {
-    if(nodes[i].active == 1) {
-      if(nodes[i].temp < settings_low[i]) {
-        ventOpen(i);
-        if(DEBUG) {
-          Serial.print("Node ");
-          Serial.print(i+1);
-          Serial.println(" temperature needs raised");
-        }
-      } 
-      else if (nodes[i].temp > settings_high[i]) {
-        ventClose(i);
-        if(DEBUG) {
-          Serial.print("Node ");
-          Serial.print(i+1);
-          Serial.println(" temperature needs lowered");
-        }
-      } 
-      else {
-        if(DEBUG) {
-          Serial.print("Node ");
-          Serial.print(i+1);
-          Serial.println(" temperature is good");
-        }
-      }
-    } 
-    else {
+    if(nodes[i].active==1) {
+      ventOpen(i);
+      refTEMP += nodes[i].temp;
+      refLOW += settings_low[i];
+      refHIGH += settings_high[i];
+      n++;
+    } else {
       ventClose(i);
-      if(DEBUG) {
-        Serial.print("Node ");
-        Serial.print(i+1);
-        Serial.println(" is inactive");
-      }
     }
   }
+  
+  refTEMP /= float(n);
+  refLOW /= float(n);
+  refHIGH /= float(n);
+  
+  if(override != 0.0) {
+    refLOW = override;
+    refHIGH = refLOW + 3;
+  }
+  
+  if(DEBUG) {
+    Serial.print("Reference temperature: ");
+    Serial.println(refTEMP);
+    Serial.print("Low/high reference limits: ");
+    Serial.print(refLOW);
+    Serial.print("/");
+    Serial.println(refHIGH);
+  }
+  
+  if(refTEMP < refLOW) {
+    if(DEBUG) Serial.println("Temperature needs raised");
+    heatON();
+  } else if(refTEMP > refHIGH) {
+    if(DEBUG) Serial.println("Temperature needs lowered");
+    heatOFF();
+  } else {
+    if(DEBUG) Serial.println("Temperature is good");
+  }      
+  
   if(DEBUG) Serial.println("Control checks complete");
+}
+
+void heatON() {
+  digitalWrite(pHEAT, LOW);
+  if(DEBUG) Serial.println("Heater on");
+  heat = 1;
+}
+
+void heatOFF() {
+  digitalWrite(pHEAT, HIGH);
+  if(DEBUG) Serial.println("Heater off");
+  heat = 0;
 }
 

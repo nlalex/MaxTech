@@ -37,7 +37,7 @@ class Node {
     int _ldr2;
     int _pir; //temporary motion holder for raw data
 	int ct;
-	void active; //0 or 1 placeholder for monitored scheduling features
+	int active; //0 or 1 placeholder for monitored scheduling features
 	void isActive(int bActive); //changes whether or not node is active
 };
 
