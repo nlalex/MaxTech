@@ -24,8 +24,6 @@ class Node {
     void stashConvertHub(); //same as above but for hub
     void testDatabaseSend(); //formats data as .csv and sends to python script via Serial
     int sendToDatabase(WiFiClient client);
-	void actuatedON();
-	void actuatedOFF();
     XBeeAddress64 addr; //node address placeholder
     int num; //node number for referencing purposes
     float tAdjust; //temperature adjustment factor
@@ -33,11 +31,14 @@ class Node {
     float temp;
     float hum;
     int actuated; //0 or 1 placeholder for energy tracking
+	void isActuated(int bActuated); //changes whether or not node is actuated
     boolean trip; //whether or not node has been activated
     int _ldr1;
     int _ldr2;
     int _pir; //temporary motion holder for raw data
 	int ct;
+	void active; //0 or 1 placeholder for monitored scheduling features
+	void isActive(int bActive); //changes whether or not node is active
 };
 
 #endif

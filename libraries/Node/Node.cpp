@@ -16,8 +16,9 @@ Node::Node(XBeeAddress64 addr_in, int num_in) {
   if(num == HUB_NUM) {
     pinMode(pPIRh, INPUT);
   }
-  actuated = 0;
+  actuated = 3;
   ct = 0;
+  active = 0;
 }
 
 Node::~Node() {}
@@ -263,12 +264,10 @@ int Node::sendToDatabase(WiFiClient client) {
 	}
 }
 
-void Node::actuatedON() {
-	actuated = 1;
+void Node::isActuated(int bActuated) {
+	actuated = bActuated;
 }
 
-void Node::actuatedOFF() {
-	actuated = 0;
+void Node::isActive(int bActive) {
+	active = bActive;
 }
-
-
