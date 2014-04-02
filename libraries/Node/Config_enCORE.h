@@ -6,6 +6,7 @@ const XBeeAddress64 HUB_ADDR = XBeeAddress64(0,0);
 const unsigned long tWaitSend = 3000; //1000 good
 const char server[] = "mesh.org.ohio-state.edu";
 const unsigned long tSendTimeout = 300000;
+const int threshPIR = 100;
 
 //XBee addresses
 const XBeeAddress64 addr2 = XBeeAddress64(0x0013A200,0x40ABB9A8); //black

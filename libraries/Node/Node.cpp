@@ -32,6 +32,7 @@ void Node::stash(ZBRxIoSampleResponse packet) {
   if (!packet.isDigitalOn(pPIR)) {
     _pir = 1;
   }
+  //_pir = packet.isDigitalOn(pPIR);
   trip = true;
 }
 
@@ -53,9 +54,11 @@ void Node::stashHub() {
   delay(10);
   hum = analogRead(pHUMh);
   delay(10);
-  if (digitalRead(pPIRh)==0) {
+  if (analogRead(pPIRh)<threshPIR) {
     _pir = 1;
   }
+  delay(10);
+  //_pir = analogRead(pPIRh);
   trip = true;
 }
 
@@ -79,7 +82,7 @@ void Node::convertTemp() {
 
 void Node::convertTempHub() {
   int temp_analog = temp;
-  float voltage = float(temp_analog) * 5.0;
+  float voltage = float(temp_analog) * 3.3;
   voltage /= 1024.0;  
   float temperatureC = (voltage - 0.5) * 100.0 ;
   float temperatureF = ((temperatureC * 9.0) / 5.0) + 32.0;
@@ -96,7 +99,7 @@ void Node::convertHum() {
 
 void Node::convertHumHub() {
   float supply_voltage = 5.;
-  float hum_voltage = 5.0/1023. * hum *4.;
+  float hum_voltage = 3.3/1023. * hum *4.;
   float raw_reading = (hum_voltage/supply_voltage -0.16)/0.0062;
   float hum_reading = raw_reading/(1.0546-0.00216*((temp-32.)*5./9.));
   hum = hum_reading + hAdjust;

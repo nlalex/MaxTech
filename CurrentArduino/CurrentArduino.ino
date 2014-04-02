@@ -26,8 +26,7 @@ Node node3 = Node(addr3, 3);
 Node node4 = Node(addr4, 4);
 Node node5 = Node(addr5, 5);
 Node node6 = Node(addr6, 6);
-Node nodes[] = {
-  hub, node2, node3, node4, node5, node6}; //array containing previously defined Nodes
+Node nodes[] = {hub, node2, node3, node4, node5, node6}; //array containing previously defined Nodes
 int nodeCount = 6; //number of objects in above array
 
 //define timing routine constants
@@ -42,10 +41,12 @@ WiFiClient client;
 char ssid[] = "enCORE_OSU"; //your network SSID (name)
 char pass[] = "20solardec11"; // your network password
 
+float settings_high[6];
+float settings_low[6];
 
 void setup()
 {
-  //analogReference(EXTERNAL); //only enable if analog reference other than 5V is used
+  analogReference(EXTERNAL); //external reference of 3.3V is used
   if(DEBUG) Serial.begin(9600); //for communication to/from computer
 
   Serial1.begin(9600); //for communication to/from XBee with Mega
@@ -56,6 +57,8 @@ void setup()
   for(int i=0; i<nodeCount+2; i++) {
     pinMode(pHeaters[i], OUTPUT);
   }
+  heatersON();
+  delay(5000);
   heatersOFF();
 
   //attempt to connect to Wifi network:
@@ -76,7 +79,11 @@ void loop() {
         for(int i=0; i < nodeCount; i++) { //cycle through each node to see if address matches any nodes
           if(nodes[i].matchAddress(response)) { //if match is detected
             nodes[i].stashConvert(response); //save data to node
-            if(DEBUG) nodes[i].printAllCompact();
+            if(DEBUG) {
+              nodes[i].printAllCompact();
+              //nodes[0].stashConvertHub();
+              //nodes[0].printAllCompact();
+            }
           }
         }
       }
@@ -86,6 +93,10 @@ void loop() {
 
     nodes[0].stashConvertHub(); //save hub data
 
+    //run control routine
+    //control1();
+    control2();
+    
     //send data to database
     unsigned long start_send = millis();
     if(DEBUG) Serial.println("Sending data...");
@@ -99,10 +110,7 @@ void loop() {
       Serial.println(" seconds");
     }
 
-    getSettings(); //gets temp settings from database
-
-    //run control routine
-    control1();
+    //getSettings(); //gets temp settings from database
 
     last_time = millis(); //reset timing for next iteration
   }
@@ -147,9 +155,9 @@ void control1() {
 void control2() { 
   if(DEBUG)  Serial.println("Beginning deadband control checks with single reference...");
 
-  float referenceCoeffs[] = {.10, .15, .25, .15, .10, .25};
-  float referenceTemp;
-  for(i=0; i<nodeCount; i++) {
+  float referenceCoeffs[] = {.10, .15, .25, .15, .25, .10};
+  float referenceTemp = 0;
+  for(int i=0; i<nodeCount; i++) {
     referenceTemp += referenceCoeffs[i] * nodes[i].temp;
   }
   
@@ -369,7 +377,9 @@ void getSettings() {
   int response_end = 0;
   char c[] = "";
   char buffer[10];
-
+  
+  client.flush();
+  client.stop();
   if (client.connect(server, 80)) {
     Serial.println("connecting...");
     // send the HTTP PUT request:
@@ -379,7 +389,10 @@ void getSettings() {
     client.println("Connection: close");
     client.println();
     delay(10000);
+  } else {
+    client.stop();
   }
+  
   while (client.available()) {     // change 1000 if your query is larger than 1000 characters
     char c = client.read();
     http_response += c;   // We store the response in a string
