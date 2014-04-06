@@ -49,9 +49,10 @@ const int NTP_PACKET_SIZE = 48; //NTP time stamp is in the first 48 bytes of the
 byte packetBuffer[ NTP_PACKET_SIZE]; //buffer to hold incoming and outgoing packets
 WiFiUDP Udp; //a UDP instance to let us send and receive packets over UDP
 float hourDecimal; //variable for current UTC time in decimal hours
+const unsigned long hr = 3600.0; //seconds to hour conversion for convenience
 
-float settings_high[6];
-float settings_low[6];
+float settings_high[6] = {73.0,73.0,73.0,73.0,73.0,73.0}; //default high settings at 73
+float settings_low[6] = {71.0,71.0,71.0,71.0,71.0,71.0}; //default low settings at 71
 
 void setup()
 {
@@ -74,6 +75,7 @@ void setup()
   connectWifi();
   if(DEBUG) printWifiStatus();
   
+  //begin time server connection
   if(DEBUG) Serial.println("Connecting UDP server...");
   Udp.begin(localPort);
 
@@ -106,10 +108,20 @@ void loop() {
   else {  //if timeout occurs
 
     nodes[0].stashConvertHub(); //save hub data
-
-    //run control routine
-    //control1();
-    control2();
+    
+    int timeCheck = getTime();
+    if(timeCheck == 1) {
+      schedule1(); //check schedule
+      getSettings(); //get temperature setpoints
+      control3(); //run control actuation
+    } else {
+      if(DEBUG) Serial.println("Time not received");
+      hourDecimal = 2; //default to nighttime actuation
+      schedule1();
+      getSettings();
+      control3();
+    }
+      
     
     //send data to database
     unsigned long start_send = millis();
@@ -123,8 +135,6 @@ void loop() {
       Serial.print((millis()-start_send)/1000.);
       Serial.println(" seconds");
     }
-
-    //getSettings(); //gets temp settings from database
 
     last_time = millis(); //reset timing for next iteration
   }
@@ -208,82 +218,138 @@ void control2() {
   if(DEBUG) Serial.println("Control checks completed.");
 }
 
-//control scheme using individual node temperatures
+
+void schedule1() {
+/* Simplified family schedule
+Sleep (until 7) -> Master bdrm, child bdrm
+Wake-up/breakfast (7-8) -> bathroom, kitchen, hw
+Morning (8-12) -> living rm, hw
+Lunch (12-1) -> living rm, kitchen
+Afternoon (1-5) -> living rm, hw
+Dinner (5-6) -> living rm, kitchen
+Evening (6-9) -> living rm, hw
+Bedtime (9-10) -> bathroom, hw, master bdrm, child bdrm
+*/
+  if(DEBUG) Serial.print("Family scheduling check...");
+  
+  if(hourDecimal < 7.0*hr) {
+    int activeArray[] = {0,0,0,1,1,0};
+    for(int i=0; i<nodeCount; i++) {
+      node[i].isActive(activeArray[i]);
+    }
+  } else if (hourDecimal < 8.0*hr) {
+    int activeArray[] = {1,0,1,0,0,1};
+    for(int i=0; i<nodeCount; i++) {
+      node[i].isActive(activeArray[i]);
+    }
+  } else if (hourDecimal < 12.0*hr) {
+    int activeArray[] = {1,1,0,0,0,0};
+    for(int i=0; i<nodeCount; i++) {
+      node[i].isActive(activeArray[i]);
+    }
+  } else if (hourDecimal < 13.0*hr) {
+    int activeArray[] = {0,1,1,0,0,1};
+    for(int i=0; i<nodeCount; i++) {
+      node[i].isActive(activeArray[i]);
+    }
+  } else if (hourDecimal < 17.0*hr) {
+    int activeArray[] = {1,1,0,0,0,0};
+    for(int i=0; i<nodeCount; i++) {
+      node[i].isActive(activeArray[i]);
+    }
+  } else if (hourDecimal < 18.0*hr) {
+    int activeArray[] = {0,1,1,0,0,0};
+    for(int i=0; i<nodeCount; i++) {
+      node[i].isActive(activeArray[i]);
+    }
+  } else if (hourDecimal < 21.0*hr) {
+    int activeArray[] = {1,1,0,0,0,0};
+    for(int i=0; i<nodeCount; i++) {
+      node[i].isActive(activeArray[i]);
+    }
+  } else if (hourDecimal < 22.0*hr) {
+    int activeArray[] = {1,0,0,1,1,1};
+    for(int i=0; i<nodeCount; i++) {
+      node[i].isActive(activeArray[i]);
+    }
+  } else {
+    int activeArray[] = {0,0,0,1,1,0};
+    for(int i=0; i<nodeCount; i++) {
+      node[i].isActive(activeArray[i]);
+    }
+  }
+  if(DEBUG) Serial.println("Complete");
+}
+
+//zoned control scheme using variable setpoints and hardcoded schedule
 void control3() { 
-  if(DEBUG)  Serial.println("Beginning deadband control checks with individual references...");
+  if(DEBUG)  Serial.println("Deadband control checks with individual references...");
 
-  if(hub.trip) {
-    if(hub.temp > highTemp) {
-      //actuate to lower temp
-      if(DEBUG) Serial.println("Hub temperature needs lowered.");
-    } 
-    else if(hub.temp < lowTemp) {
-      //actuate to raise temp
-      if(DEBUG) Serial.println("Hub temperature needs raised.");
-    } 
-    else {
-      //do nothing
-      if(DEBUG) Serial.println("Hub temperature is good.");
-    }
-  } 
-  else {
-    //data not received from hub
-    if(DEBUG) Serial.println("Hub contains null data.");
-  }
-
-
-  for(int i=0; i < nodeCount; i++) {
-    if(DEBUG) {
-      Serial.print("Node ");
-      Serial.print(i+2);
-    }
-    if(nodes[i].trip) {
-      if(nodes[i].temp > highTemp) {
-        //actuate to lower temp
-        if(DEBUG)  Serial.println(" temperature needs lowered.");
-      } 
-      else if(nodes[i].temp < lowTemp) {
-        //actuate to raise temp
-        if(DEBUG) Serial.println(" temperature needs raised.");
-      } 
-      else {
-        //do nothing
-        if(DEBUG) Serial.println(" temperature is good.");
+  for(int i=0; i<nodeCount; i++) {
+    if(node[i].active == 1) {
+      if(node[i].temp < settings_low) {
+        heaterON(i);
+        if(DEBUG) {
+          Serial.print("Node ");
+          Serial.print(i+1);
+          Serial.println(" temperature needs raised");
+        }
+      } else if (node[i].temp > settings_high) {
+        heaterOFF(i);
+        if(DEBUG) {
+          Serial.print("Node ");
+          Serial.print(i+1);
+          Serial.println(" temperature needs lowered");
+        }
+      } else {
+        if(DEBUG) {
+          Serial.print("Node ");
+          Serial.print(i+1);
+          Serial.println(" temperature is good");
+        }
       }
-    } 
-    else {
-      //data not received from node
-      if(DEBUG) Serial.println(" contains null data.");
+    } else {
+      if(DEBUG) {
+        Serial.print("Node ");
+        Serial.print(i+1);
+        Serial.println(" is inactive");
+      }
     }
   }
+  if(DEBUG) Serial.println("Control checks complete");
+}
 
+void heaterOFF(int p) {
+  node[p].isActuated(1);
+  digitalWrite(pHeaters[p], HIGH); //high turns heaters off
   if(DEBUG) {
-    Serial.println("Control checks completed.");
-    Serial.println("");
+    Serial.print("Heater ");
+    Serial.print(p+1):
+    Serial.println(" off");
+  }
+}
+
+void heaterON(int p) {
+  node[p].isActuated(1);
+  digitalWrite(pHeaters[p], LOW); //low turns heaters on
+  if(DEBUG) {
+    Serial.print("Heater ");
+    Serial.print(p+1):
+    Serial.println(" on");
   }
 }
 
 void heatersOFF() {
   for(int i=0; i < nodeCount; i++) {
-    //    delay(10);
-    //    digitalWrite(pHeaters[i], HIGH); //high turns heaters off
-    nodes[i].actuatedOFF();
-  }
-  for(int i=0; i < nodeCount+2; i++) {
-    digitalWrite(pHeaters[i], HIGH); //high turns heaters off
-    delay(10);
+    heaterOFF(i);
+    delay(100);
   }
 }
 
 void heatersON() {
   for(int i=0; i < nodeCount; i++) {
-    //    delay(10);
-    //    digitalWrite(pHeaters[i], LOW); //low turns heaters on
-    nodes[i].actuatedON();
-  }
-  for(int i=0; i < nodeCount+2; i++) {
-    digitalWrite(pHeaters[i], LOW); //low turns heaters on
-    delay(10);
+    heaterON(i);
+    delay(100);
   }
 }
 
@@ -385,6 +451,7 @@ void sendData(int i) {
   //delay(tWaitSend);
 }
 
+//gets temperature setpoints from website
 void getSettings() {
   String http_response = "";
   int response_start = 0;
@@ -439,8 +506,7 @@ void getSettings() {
 
 
 //send an NTP request to the time server at the given address
-unsigned long sendNTPpacket(IPAddress& address)
-{
+unsigned long sendNTPpacket(IPAddress& address) {
   //Serial.println("1");
   // set all bytes in the buffer to 0
   memset(packetBuffer, 0, NTP_PACKET_SIZE);
@@ -470,7 +536,7 @@ unsigned long sendNTPpacket(IPAddress& address)
 }
 
 //returns UTC time
-float getTime() {
+int getTime() {
   if(DEBUG) Serial.println("Pinging NIST NTP server...");
   sendNTPpacket(timeServer); //send NTP packet to time server
   // wait to see if a reply is available
@@ -491,13 +557,16 @@ float getTime() {
     unsigned long secsSince1900 = highWord << 16 | lowWord;
 
     // now convert NTP time into everyday time:
-    Serial.print("Unix time = ");
     // Unix time starts on Jan 1 1970. In seconds, that's 2208988800:
     const unsigned long seventyYears = 2208988800UL;
     // subtract seventy years:
     unsigned long epoch = secsSince1900 - seventyYears;
     // print Unix time:
-    if(DEBUG) Serial.println(epoch);
+    if(DEBUG) {
+      Serial.print("Pre-adjusted UNIX time: ");
+      Serial.println(epoch);
+    }
+    epoch -= 3600*4; //correction from UTC to EDT (-4h);
     
     hourDecimal = ((epoch  % 86400L) / 3600) + ((epoch  % 3600) / 60)/60.0 + (epoch % 60)/3600.0;
     
@@ -505,5 +574,10 @@ float getTime() {
       Serial.print("Current UTC time in hours: ");
       Serial.println(hourDecimal);
     }
+    
+    return 1;
+  }
+  else {
+    return 0;
   }
 }
