@@ -147,6 +147,8 @@ void Node::printAllCompact() {
   Serial.print(" : ");
   Serial.print(trip);
   Serial.print(" : ");
+  Serial.print(active);
+  Serial.print(" : ");
   Serial.print(temp);
   Serial.print(" : ");
   Serial.print(hum);
@@ -157,7 +159,7 @@ void Node::printAllCompact() {
   Serial.print(" : ");
   Serial.print(_pir);
   Serial.print(" : ");
-  Serial.println(actuated);
+  Serial.print(actuated);
 }
 
 void Node::stashConvert(ZBRxIoSampleResponse packet) {
@@ -233,12 +235,11 @@ int Node::sendToDatabase(WiFiClient client) {
 	}
 }
 
-void Node::actuatedON() {
-	actuated = 1;
+void Node::isActuated(int bActuated) {
+	actuated = bActuated;
 }
 
-void Node::actuatedOFF() {
-	actuated = 0;
+void Node::isActive(int bActive) {
+	active = bActive;
 }
-
 
