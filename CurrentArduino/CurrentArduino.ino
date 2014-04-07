@@ -313,6 +313,7 @@ void control3() {
       }
     } 
     else {
+      heaterOFF(i);
       if(DEBUG) {
         Serial.print("Node ");
         Serial.print(i+1);
@@ -415,6 +416,10 @@ void sendData(int i) {
       client.print(nodes[i].actuated);
       client.print("&active=");
       client.print(nodes[i].active);
+      client.print("&settinghigh=");
+      client.print(settings_high[i]);
+      client.print("&settinglow=");
+      client.print(settings_low[i]);
       //            client.print("&crt=");
       //            client.print(nodes[i].ct);
       client.println(" HTTP/1.1");
