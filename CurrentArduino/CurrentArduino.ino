@@ -46,7 +46,7 @@ boolean vOpen = false;
 
 void setup()
 {
-  //analogReference(EXTERNAL);
+  analogReference(EXTERNAL); //3.3V analog reference is used to help with temperature readings
   if(DEBUG) Serial.begin(9600); //For communication to/from computer
 
   Serial1.begin(9600); //For communication to/from XBee with Mega
