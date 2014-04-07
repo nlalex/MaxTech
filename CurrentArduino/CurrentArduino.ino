@@ -22,8 +22,7 @@ Node node3 = Node(addr3, 3);
 Node node4 = Node(addr4, 4);
 Node node5 = Node(addr5, 5);
 Node node6 = Node(addr6, 6);
-Node nodes[] = {
-  hub, node2, node3, node4, node5, node6}; //Array containing previously defined Nodes
+Node nodes[] = {hub, node2, node3, node4, node5, node6}; //Array containing previously defined Nodes
 int nodeCount = 6; //number of objects in above array
 
 //define timing routine constants
@@ -40,10 +39,8 @@ char pass[] = "esoom@!owl";   // your network password
 
 float hourDecimal; //variable for current time in decimal hours
 
-float settings_high[6] = {
-  73.0,73.0,73.0,73.0,73.0,73.0}; //default high settings at 73
-float settings_low[6] = {
-  71.0,71.0,71.0,71.0,71.0,71.0}; //default low settings at 71
+float settings_high[6] = {73.0,73.0,73.0,73.0,73.0,73.0}; //default high settings at 73
+float settings_low[6] = {71.0,71.0,71.0,71.0,71.0,71.0}; //default low settings at 71
 
 boolean vOpen = false;
 
@@ -60,6 +57,16 @@ void setup()
     pinMode(pVentPos[i], OUTPUT);
     pinMode(pVentNeg[i], OUTPUT);
     pinMode(pVentEnable[i], OUTPUT);
+  }
+
+  if(DEBUG) {
+    ventsOpen();
+    for(int i=0; i<nodeCount; i++) {
+      delay(1000);
+      ventClose(i);
+    }
+  } else {
+    ventsClose();
   }
 
   // attempt to connect to Wifi network:
@@ -244,6 +251,12 @@ void sendData(int i) {
       client.print(nodes[i].actuated);
       client.print("&crt=");
       client.print(nodes[i].ct);
+      client.print("&active=");
+      client.print(nodes[i].active);
+      client.print("&settinghigh=");
+      client.print(settings_high[i]);
+      client.print("&settinglow=");
+      client.print(settings_low[i]);
       client.println(" HTTP/1.1");
       client.println("Host: mesh.org.ohio-state.edu");
       client.println("User-Agent: ArduinoWiFi/1.1");
@@ -372,8 +385,8 @@ void getTime() {
   for(int i=0; i<(response_end-response_start); i++){
     httpParse[i] = http_response.charAt(i+response_start);
   }
-  hourDecimal = (httpParse[0]-48)*10+(httpParse[1]-48);
-  //  hourDecimal = ((httpParse[0]-48)*10+(httpParse[1]-48)) + ((httpParse[3]-48)*10+(httpParse[4]-48))/60.0 + ((httpParse[6]-48)*10+(httpParse[7]-48))/3600.0
+//  hourDecimal = (httpParse[0]-48)*10+(httpParse[1]-48);
+  hourDecimal = ((httpParse[0]-48)*10+(httpParse[1]-48)) + ((httpParse[3]-48)*10+(httpParse[4]-48))/60.0 + ((httpParse[6]-48)*10+(httpParse[7]-48))/3600.0;
   if(DEBUG) {
     Serial.print("Time: ");
     Serial.println(hourDecimal);
@@ -491,6 +504,7 @@ void control1() {
       }
     } 
     else {
+      ventClose(i);
       if(DEBUG) {
         Serial.print("Node ");
         Serial.print(i+1);
