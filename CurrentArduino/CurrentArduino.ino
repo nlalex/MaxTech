@@ -65,30 +65,31 @@ void setup()
   Serial1.begin(9600); //For communication to/from XBee with Mega
   xbee.setSerial(Serial1);
 
-  if(DEBUG) Serial.println("Initializing & turning heater off");
-  pinMode(pHEAT, OUTPUT);
-  if(DEBUG) Serial.println("Initializing & closing all vents");
+//  if(DEBUG) Serial.println("Initializing & turning heater off");
+//  pinMode(pHEAT, OUTPUT);
+  if(DEBUG) Serial.println("Initializing & opening all vents");
   for(int i=0; i<nodeCount; i++) { //may need dummy pins defined for padding
     pinMode(pVentPos[i], OUTPUT);
     pinMode(pVentNeg[i], OUTPUT);
     pinMode(pVentEnable[i], OUTPUT);
   }
 
-  if(DEBUG) {
-    ventsOpen();
-    for(int i=0; i<nodeCount; i++) {
-      delay(1000);
-      ventClose(i);
-    }
-  } else {
-    ventsClose();
-  }
+//  if(DEBUG) {
+//    ventsOpen();
+//    for(int i=0; i<nodeCount; i++) {
+//      delay(1000);
+//      ventClose(i);
+//    }
+//  } else {
+//    ventsClose();
+//  }
+  ventsOpen();
 
   // attempt to connect to Wifi network:
   connectWifi();
   if(DEBUG) printWifiStatus();
   
-  getTime();
+//  getTime();
   
   if(DEBUG) Serial.println("All setup complete");
 
@@ -119,10 +120,10 @@ void loop() {
   else {  
     nodes[0].stashConvertHub();
 
-    getTime();
-    float override = schedule2();
+//    getTime();
+//    float override = schedule2();
     getSettings();
-    control1(override);
+//    control1(override);
     
     //send data to database
     unsigned long start_send = millis();
@@ -265,7 +266,7 @@ void sendData(int i) {
       client.print("&heat=");
       client.print(nodes[i].actuated);
       client.print("&crt=");
-      client.print(heat);
+      client.print(node[0].ct);
       client.print("&active=");
       client.print(nodes[i].active);
       client.print("&settinghigh=");
