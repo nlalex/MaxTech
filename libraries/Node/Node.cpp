@@ -17,7 +17,7 @@ Node::Node(XBeeAddress64 addr_in, int num_in) {
     pinMode(pPIRh, INPUT);
   }
   actuated = 3;
-  // ct = 0;
+  ct = 0;
   active = 0;
 }
 
@@ -67,11 +67,11 @@ void Node::stashHub() {
       break;
   }
   trip = true;
-  // if(analogRead(pCT)>threshCT) {
-	// ct = 1;
-   // }else {
-	// ct = 0;
-	// }
+  if(analogRead(pCT)>threshCT) {
+	 ct = 1;
+   }else {
+	 ct = 0;
+	}
 }
 
 void Node::flush() {
