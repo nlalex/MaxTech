@@ -34,8 +34,8 @@ int status = WL_IDLE_STATUS;
 WiFiClient client;
 
 //WiFi network settings
-char ssid[] = "ticklish_chickens";      //  your network SSID (name)
-char pass[] = "esoom@!owl";   // your network password
+char ssid[] = "*****";      //  your network SSID (name)
+char pass[] = "*****";   // your network password
 
 float hourDecimal; //variable for current time in decimal hours
 
@@ -266,7 +266,7 @@ void sendData(int i) {
       client.print("&heat=");
       client.print(nodes[i].actuated);
       client.print("&crt=");
-      client.print(node[0].ct);
+      client.print(nodes[0].ct);
       client.print("&active=");
       client.print(nodes[i].active);
       client.print("&settinghigh=");
