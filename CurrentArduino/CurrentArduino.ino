@@ -1,5 +1,5 @@
 // CurrentArduino -> enCORE setup
-// 02/22/2014
+// 04/22/2014
 
 // Code modified from: Adafruit.com; Peter H Anderson; xbee-arduino library examples
 
@@ -34,8 +34,8 @@ int status = WL_IDLE_STATUS;
 WiFiClient client;
 
 //WiFi network settings
-char ssid[] = "enCORE_OSU"; //your network SSID (name)
-char pass[] = "20solardec11"; //your network password
+char ssid[] = "XXXXX"; //your network SSID (name)
+char pass[] = "XXXXX"; //your network password
 
 float hourDecimal; //variable for current time in decimal hours
 
@@ -102,8 +102,6 @@ void loop() {
             nodes[i].stashConvert(response); //save data to node
             if(DEBUG) {
               nodes[i].printAllCompact();
-//              nodes[0].stashConvertHub();
-//              nodes[0].printAllCompact();
             }
           }
         }
@@ -405,13 +403,6 @@ void sendData(int i) {
   client.stop();
   if(client.connect(server, 80)) {
     if(nodes[i].trip) {
-//      while(!client.connected()) { // && millis()-tStart<tSendTimeout
-//        client.stop();
-//        client.flush();
-//        client.connect(server, 80);
-//        delay(100);
-//      }
-
       client.print("GET /hook1.php?node="); //needs modified for differing databases
       client.print(nodes[i].num);
       client.print("&temp=");
@@ -432,8 +423,6 @@ void sendData(int i) {
       client.print(settings_high[i]);
       client.print("&settinglow=");
       client.print(settings_low[i]);
-      //            client.print("&crt=");
-      //            client.print(nodes[i].ct);
       client.println(" HTTP/1.1");
       client.println("Host: mesh.org.ohio-state.edu");
       client.println("User-Agent: ArduinoWiFi/1.1");
@@ -470,8 +459,6 @@ void sendData(int i) {
     }
   }
   nodes[i].flush();
-  //sendCheck = 5;
-  //delay(tWaitSend);
 }
 
 //gets temperature setpoints from website
